@@ -1,5 +1,15 @@
-# Node modülleri ve paket yöneticileri
+# ===============================
+# 📦 NODE MODULES VE BAĞIMLILIKLAR
+# ===============================
+
+# Node modülleri (TÜM KLASÖRLER)
+node_modules/
+*/node_modules/
+**/node_modules/
 frontend/node_modules/
+backend/node_modules/
+
+# NPM ve Yarn dosyaları
 frontend/.pnp
 frontend/.pnp.js
 frontend/.yarn/cache
@@ -7,6 +17,7 @@ frontend/.yarn/unplugged
 frontend/.yarn/build-state.yml
 frontend/.yarn/install-state.gz
 frontend/.pnp.*
+.pnpm-debug.log*
 
 # Frontend build klasörleri
 frontend/build/
@@ -103,8 +114,10 @@ htmlcov/
 # 💻 EDITÖR VE IDE DOSYALARI
 # ===============================
 
-# VS Code
+# VS Code (TÜM KLASÖRLER)
 .vscode/
+*/.vscode/
+**/.vscode/
 *.code-workspace
 
 # PyCharm / IntelliJ
@@ -184,6 +197,31 @@ pyproject.toml
 # Pipenv
 Pipfile.lock
 
-# Requirements dosyaları (güvenlik için)
+# Requirements dosyaları (güvenlik için - ana requirements.txt hariç)
 backend/requirements-dev.txt
 backend/requirements-local.txt
+
+# ===============================
+# 📝 DOKÜMANTASYON VE MEDYA
+# ===============================
+
+# Kullanıcı yüklenen dosyalar
+uploads/
+media/user_uploads/
+
+# Geçici dosyalar
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# ===============================
+# 🔐 GÜVENLİK DOSYALARI
+# ===============================
+
+# API anahtarları ve secrets
+.secrets
+secrets.json
+*.pem
+*.key
+*.crt
