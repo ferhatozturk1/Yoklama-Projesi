@@ -1,39 +1,75 @@
-QR Kodlu Yoklama Sistemi - Frontend
-Modern QR kod tabanlı yoklama sistemi, React ve Material-UI ile geliştirilmiştir. Bu sistem, öğretmenler için kolay bir yoklama alma deneyimi sunarken, öğrenciler için hızlı ve güvenli bir katılım imkanı sağlar.
+🚀 QR Kodlu Yoklama Sistemi - Frontend
+Bu proje, QR kod tabanlı bir yoklama sistemi sunar ve React ile Material-UI kullanılarak geliştirilmiştir. Sistem, öğretmenlerin yoklama almasını hızlandırmak için tasarlanmış olup, öğrencilerin kolayca katılım sağladığı modern bir çözüm sunar.
 
-Özellikler
-QR Kodlu Yoklama: Öğrenciler, her 3 saniyede yenilenen güvenli QR kodlarını tarayarak yoklamaya katılır.
+🏷 Özellikler
+QR Kodlu Yoklama: Her 3 saniyede yenilenen güvenli QR kodları ile öğrenci yoklaması yapılır.
 
-Öğretmen Paneli: Kolay kullanımlı ve işlevsel bir arayüzle öğretmenler, yoklama işlemini hızlıca yönetebilir.
+Öğretmen Paneli: Öğretmenler için kullanıcı dostu ve etkili bir yönetim paneli sunar.
 
-Öğrenci Yönetimi: Excel üzerinden öğrenci veri import ve export işlemleri yapılabilir.
+Öğrenci Yönetimi: Öğrenci verileri Excel dosyalarıyla kolayca içeri aktarılabilir ve dışa aktarılabilir.
 
-Gerçek Zamanlı Timer: Yoklama süresi, öğretmen tarafından belirlenebilir ve gerçek zamanlı olarak izlenebilir.
+Gerçek Zamanlı Timer: Yoklama süresi öğretmen tarafından belirlenebilir ve gerçek zamanlı olarak izlenebilir.
 
-Responsive Tasarım: Sistem, tüm cihazlarla uyumlu şekilde çalışacak şekilde tasarlanmıştır.
+Responsive Tasarım: Mobil cihazlar da dahil olmak üzere tüm cihazlarla uyumlu tasarım.
 
-Kurulum Adımları
-Projeyi yerel olarak çalıştırmak için aşağıdaki adımları takip edebilirsiniz:
+🛠 Teknolojiler
+React: Kullanıcı arayüzü geliştirme
 
-Frontend Dizini'ne Gitme:
+Material-UI: Tasarım ve bileşen kütüphanesi
+
+JWT (JSON Web Token): Öğrenci doğrulama ve güvenlik
+
+Axios: API ile veri iletişimi
+
+Excel: Öğrenci verisi içeri ve dışarı aktarımı için
+
+📥 Kurulum
+Projenin frontend kısmını yerel olarak çalıştırmak için aşağıdaki adımları takip edebilirsiniz:
+
+1. Bağımlılıkları Yükleme
+İlk olarak, projeyi klonlayıp frontend klasörüne geçiş yapın ve gerekli bağımlılıkları yüklemek için aşağıdaki komutları çalıştırın:
 
 bash
 Kopyala
 Düzenle
 cd frontend
-Bağımlılıkları Yükleme:
-Gerekli tüm bağımlılıkları yüklemek için:
-
-bash
-Kopyala
-Düzenle
 npm install
-Uygulamayı Çalıştırma:
-Uygulamayı geliştirme modunda başlatmak için:
+2. Uygulamayı Başlatma
+Bağımlılıklar yüklendikten sonra, uygulamayı geliştirme modunda başlatabilirsiniz:
 
 bash
 Kopyala
 Düzenle
 npm run dev
-Bu komutla uygulamanızı başlatabilirsiniz. Tarayıcınızda http://localhost:3000 adresine giderek sistemi görüntüleyebilirsiniz.
+Bu komut, geliştirme sunucusunu başlatacak ve genellikle http://localhost:3000 adresinde çalışmaya başlayacaktır. Tarayıcınızda bu adresi açarak uygulamanızı görüntüleyebilirsiniz.
 
+🖥 Kullanım
+QR Kodunu Görüntüleme: Öğretmen, öğrencilere QR kodunu gösterecek. Öğrenciler bu QR kodunu okutacaklar.
+
+Yoklama Almak: Öğrenciler QR kodunu okuttuğunda, yoklama verisi backend'e gönderilecek ve öğrenci katılımı kaydedilecek.
+
+Öğrenci Yönetimi: Öğrenci bilgilerini Excel dosyasından içeri aktarabilir ve dışa aktarabilirsiniz.
+
+Zamanlayıcı: Öğretmen, QR kodunun geçerliliği için bir süre belirleyebilir.
+
+🤝 Katkıda Bulunma
+Projeye katkıda bulunmak isterseniz, lütfen pull request göndermeden önce fork yaparak çalışmanızı gerçekleştirin.
+
+1. Feature Branch Oluşturma
+Geliştiricilerin proje üzerinde çalışabilmesi için, öncelikle feature branch oluşturulması gerekmektedir:
+
+bash
+Kopyala
+Düzenle
+git checkout -b feature/branch-name
+2. Commit ve Push İşlemleri
+Çalışmalarınızı tamamladıktan sonra commit ve push işlemleri gerçekleştirebilirsiniz:
+
+bash
+Kopyala
+Düzenle
+git add .
+git commit -m "Feature description"
+git push origin feature/branch-name
+3. Pull Request Gönderme
+Son olarak, GitHub üzerinden pull request oluşturarak katkınızı sunabilirsiniz.
