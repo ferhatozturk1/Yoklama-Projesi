@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import QRCode from 'qrcode';
 import { 
   Box, 
   Typography, 
@@ -25,7 +26,6 @@ import {
   DialogActions,
   TextField,
   IconButton,
-  Fab,
   Snackbar,
   Alert,
   Table,
@@ -148,9 +148,15 @@ const OgretmenPanel = () => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openStudentListDialog, setOpenStudentListDialog] = useState(false);
   const [openTelafiDialog, setOpenTelafiDialog] = useState(false);
+  const [openQRDialog, setOpenQRDialog] = useState(false);
+  const [qrCode, setQrCode] = useState('');
+  const [yoklamaSuresi, setYoklamaSuresi] = useState(5); // dakika
+  const [kalanSure, setKalanSure] = useState(0);
+  const [aktifYoklama, setAktifYoklama] = useState(null);
+  const [qrTimer, setQrTimer] = useState(null);
+  const [countdownTimer, setCountdownTimer] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedWeek, setSelectedWeek] = useState('');
   const [telafiDetails, setTelafiDetails] = useState({
     ders: 'Matematik',
     sinif: '10-A',
@@ -166,6 +172,14 @@ const OgretmenPanel = () => {
     baslangicSaat: "",
     bitisSaat: ""
   });
+
+  // Cleanup timer'ları component unmount olduğunda
+  useEffect(() => {
+    return () => {
+      if (qrTimer) clearInterval(qrTimer);
+      if (countdownTimer) clearInterval(countdownTimer);
+    };
+  }, [qrTimer, countdownTimer]);
 
   const handleYoklamaBasla = () => {
     setOpenDialog(true);
@@ -184,7 +198,13 @@ const OgretmenPanel = () => {
     };
     
     setYoklamalar([...yoklamalar, yeniYoklama]);
+    setAktifYoklama(yeniYoklama);
     setOpenDialog(false);
+    setOpenQRDialog(true);
+    
+    // QR kod yoklamasını başlat
+    startQRYoklama(yeniYoklama);
+    
     setNewYoklama({
       ders: "Matematik",
       sinif: "",
@@ -192,6 +212,95 @@ const OgretmenPanel = () => {
       baslangicSaat: "",
       bitisSaat: ""
     });
+  };
+
+  // QR kod yoklamasını başlat
+  const startQRYoklama = (yoklama) => {
+    const totalSeconds = yoklamaSuresi * 60;
+    setKalanSure(totalSeconds);
+    
+    // İlk QR kodu oluştur
+    generateQRCode(yoklama);
+    
+    // Her 3 saniyede bir yeni QR kod oluştur
+    const qrInterval = setInterval(() => {
+      generateQRCode(yoklama);
+    }, 3000);
+    
+    // Geri sayım timer'ı
+    const countdown = setInterval(() => {
+      setKalanSure(prev => {
+        if (prev <= 1) {
+          clearInterval(qrInterval);
+          clearInterval(countdown);
+          endQRYoklama();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    setQrTimer(qrInterval);
+    setCountdownTimer(countdown);
+  };
+
+  // QR kod oluştur
+  const generateQRCode = async (yoklama) => {
+    try {
+      const timestamp = Date.now();
+      const qrData = {
+        yoklamaId: yoklama.id,
+        ders: yoklama.ders,
+        sinif: yoklama.sinif,
+        timestamp: timestamp,
+        validUntil: timestamp + 3000 // 3 saniye geçerli
+      };
+      
+      const qrString = await QRCode.toDataURL(JSON.stringify(qrData), {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#1a237e',
+          light: '#ffffff'
+        }
+      });
+      
+      setQrCode(qrString);
+    } catch (error) {
+      console.error('QR kod oluşturma hatası:', error);
+    }
+  };
+
+  // QR yoklamayı sonlandır
+  const endQRYoklama = () => {
+    if (qrTimer) clearInterval(qrTimer);
+    if (countdownTimer) clearInterval(countdownTimer);
+    
+    setOpenQRDialog(false);
+    setQrCode('');
+    setKalanSure(0);
+    
+    // Yoklamayı tamamlandı olarak işaretle
+    if (aktifYoklama) {
+      setYoklamalar(prev => prev.map(y => 
+        y.id === aktifYoklama.id ? { ...y, durum: "tamamlandi" } : y
+      ));
+    }
+    
+    setSnackbar({
+      open: true,
+      message: 'Yoklama tamamlandı!',
+      severity: 'success'
+    });
+    
+    setAktifYoklama(null);
+  };
+
+  // Süre formatı
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleYoklamaDurdur = (id) => {
@@ -326,7 +435,6 @@ const OgretmenPanel = () => {
       baslangicSaat: '',
       bitisSaat: ''
     });
-    setSelectedWeek('');
   };
 
   const generateWeekOptions = () => {
@@ -386,21 +494,14 @@ const OgretmenPanel = () => {
     handleTelafiClose();
   };
 
-  // Devamsızlık hesaplama fonksiyonları
-  const hesaplaDevamsizlikYuzdesi = (devamsizlik, toplamDers) => {
-    return ((devamsizlik / toplamDers) * 100).toFixed(1);
-  };
-
-  const getDevamsizlikRengi = (yuzde) => {
-    if (yuzde <= 5) return '#4caf50'; // Yeşil
-    if (yuzde <= 10) return '#ff9800'; // Turuncu
-    return '#f44336'; // Kırmızı
-  };
-
-  const getDevamsizlikChipColor = (yuzde) => {
-    if (yuzde <= 5) return 'success';
-    if (yuzde <= 10) return 'warning';
-    return 'error';
+  // Devamsızlık hesaplama utility fonksiyonu
+  const getDevamsizlikBilgisi = (devamsizlik, toplamDers) => {
+    const yuzde = ((devamsizlik / toplamDers) * 100).toFixed(1);
+    let chipColor = 'success';
+    if (yuzde > 10) chipColor = 'error';
+    else if (yuzde > 5) chipColor = 'warning';
+    
+    return { yuzde, chipColor };
   };
 
   return (
@@ -640,7 +741,7 @@ const OgretmenPanel = () => {
             <Paper elevation={2} sx={{ maxHeight: 400, overflow: 'auto' }}>
               <List>
                 {ogrenciler.slice(0, 5).map((ogrenci, index) => {
-                  const devamsizlikYuzdesi = hesaplaDevamsizlikYuzdesi(ogrenci.devamsizlik, ogrenci.toplamDers);
+                  const { yuzde, chipColor } = getDevamsizlikBilgisi(ogrenci.devamsizlik, ogrenci.toplamDers);
                   return (
                     <React.Fragment key={ogrenci.id}>
                       <ListItem sx={{ py: 2 }}>
@@ -656,8 +757,8 @@ const OgretmenPanel = () => {
                                 {ogrenci.ad} {ogrenci.soyad}
                               </Typography>
                               <Chip 
-                                label={`%${devamsizlikYuzdesi}`}
-                                color={getDevamsizlikChipColor(devamsizlikYuzdesi)}
+                                label={`%${yuzde}`}
+                                color={chipColor}
                                 size="small"
                                 sx={{ fontWeight: 'bold' }}
                               />
@@ -741,6 +842,22 @@ const OgretmenPanel = () => {
                 onChange={(e) => setNewYoklama({...newYoklama, bitisSaat: e.target.value})}
                 InputLabelProps={{ shrink: true }}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Yoklama Süresi</InputLabel>
+                <Select
+                  value={yoklamaSuresi}
+                  onChange={(e) => setYoklamaSuresi(e.target.value)}
+                  label="Yoklama Süresi"
+                >
+                  <MenuItem value={3}>3 Dakika</MenuItem>
+                  <MenuItem value={5}>5 Dakika</MenuItem>
+                  <MenuItem value={10}>10 Dakika</MenuItem>
+                  <MenuItem value={15}>15 Dakika</MenuItem>
+                  <MenuItem value={20}>20 Dakika</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </DialogContent>
@@ -853,7 +970,7 @@ const OgretmenPanel = () => {
               </TableHead>
               <TableBody>
                 {ogrenciler.map((ogrenci) => {
-                  const devamsizlikYuzdesi = hesaplaDevamsizlikYuzdesi(ogrenci.devamsizlik, ogrenci.toplamDers);
+                  const { yuzde, chipColor } = getDevamsizlikBilgisi(ogrenci.devamsizlik, ogrenci.toplamDers);
                   return (
                     <TableRow key={ogrenci.id} hover>
                       <TableCell>
@@ -872,8 +989,8 @@ const OgretmenPanel = () => {
                       <TableCell align="center">
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                           <Chip 
-                            label={`%${devamsizlikYuzdesi}`}
-                            color={getDevamsizlikChipColor(devamsizlikYuzdesi)}
+                            label={`%${yuzde}`}
+                            color={chipColor}
                             size="small"
                             sx={{ fontWeight: 'bold', minWidth: 60 }}
                           />
@@ -994,6 +1111,86 @@ const OgretmenPanel = () => {
             disabled={!telafiDetails.hafta || !telafiDetails.tarih || !telafiDetails.baslangicSaat || !telafiDetails.bitisSaat}
           >
             Yoklamayı Başlat
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* QR Kod Yoklama Dialog */}
+      <Dialog 
+        open={openQRDialog} 
+        onClose={() => {}} 
+        maxWidth="md" 
+        fullWidth
+        disableEscapeKeyDown
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">
+              QR Kod Yoklama - {aktifYoklama?.ders} ({aktifYoklama?.sinif})
+            </Typography>
+            <Chip 
+              label={formatTime(kalanSure)} 
+              color="primary" 
+              size="large"
+              sx={{ fontSize: '1.2rem', fontWeight: 'bold' }}
+            />
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h5" sx={{ mb: 3, color: '#1a237e', fontWeight: 'bold' }}>
+              Öğrenciler QR Kodu Okutarak Yoklamaya Katılabilir
+            </Typography>
+            
+            {qrCode && (
+              <Box sx={{ mb: 3 }}>
+                <img 
+                  src={qrCode} 
+                  alt="QR Kod" 
+                  style={{ 
+                    maxWidth: '300px', 
+                    height: 'auto',
+                    border: '4px solid #1a237e',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+                  }} 
+                />
+              </Box>
+            )}
+            
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              QR kod her 3 saniyede bir yenileniyor
+            </Typography>
+            
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, mt: 4 }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="h3" color="primary" sx={{ fontWeight: 'bold' }}>
+                  {aktifYoklama?.katilimci || 0}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Katılan Öğrenci
+                </Typography>
+              </Box>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="h3" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                  {aktifYoklama?.toplamOgrenci || 0}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Toplam Öğrenci
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={endQRYoklama} 
+            variant="contained" 
+            color="error"
+            size="large"
+            startIcon={<Stop />}
+          >
+            Yoklamayı Sonlandır
           </Button>
         </DialogActions>
       </Dialog>

@@ -78,6 +78,12 @@ const OgretmenKayit = () => {
       return;
     }
 
+    // E-posta edu.tr doğrulaması
+    if (!form.email.endsWith('.edu.tr')) {
+      setError('Sadece .edu.tr uzantılı kurumsal e-posta adresleri kabul edilir!');
+      return;
+    }
+
     if (form.sifre !== form.sifreTekrar) {
       setError('Şifreler eşleşmiyor!');
       return;
@@ -107,10 +113,10 @@ const OgretmenKayit = () => {
         <Box sx={{ mb: 3 }}>
           <Button
             startIcon={<ArrowBack />}
-            onClick={() => navigate('/kayit')}
+            onClick={() => navigate('/giris')}
             sx={{ color: 'white', fontWeight: 'bold' }}
           >
-            Geri Dön
+            Giriş Sayfasına Dön
           </Button>
         </Box>
 
@@ -222,6 +228,7 @@ const OgretmenKayit = () => {
                   value={form.email}
                   onChange={handleChange}
                   required
+                  helperText="Sadece .edu.tr uzantılı kurumsal e-posta adresleri kabul edilir"
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">

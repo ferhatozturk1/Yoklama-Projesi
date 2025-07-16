@@ -16,7 +16,6 @@ import {
   Login, 
   Visibility, 
   VisibilityOff,
-  ArrowBack,
   Email,
   Lock
 } from '@mui/icons-material';
@@ -37,10 +36,8 @@ const GirisYap = () => {
       return;
     }
 
-    // Demo: Kullanıcı türüne göre yönlendirme
-    if (email === 'ogrenci@example.com' && password === '1234') {
-      navigate('/ogrenci-panel');
-    } else if (email === 'ogretmen@example.com' && password === '1234') {
+    // Demo: Sadece öğretmen girişi
+    if (email === 'ogretmen@example.com' && password === '1234') {
       navigate('/ogretmen-panel');
     } else {
       setError('Geçersiz e-posta veya şifre!');
@@ -57,13 +54,14 @@ const GirisYap = () => {
     }}>
       <Container maxWidth="sm">
         <Box sx={{ mb: 3 }}>
-          <Button
-            startIcon={<ArrowBack />}
-            onClick={() => navigate('/')}
-            sx={{ color: 'white', fontWeight: 'bold' }}
-          >
-            Ana Sayfaya Dön
-          </Button>
+          <Typography variant="h5" sx={{ 
+            color: 'white', 
+            fontWeight: 'bold',
+            textAlign: 'center',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+          }}>
+            Öğretmen Yoklama Sistemi
+          </Typography>
         </Box>
 
         <Paper elevation={10} sx={{ 
@@ -171,9 +169,6 @@ const GirisYap = () => {
             <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, color: '#1a237e' }}>
               🎯 Demo Giriş Bilgileri:
             </Typography>
-            <Typography variant="body2" sx={{ mb: 0.5 }}>
-              <strong>Öğrenci:</strong> ogrenci@example.com / 1234
-            </Typography>
             <Typography variant="body2">
               <strong>Öğretmen:</strong> ogretmen@example.com / 1234
             </Typography>
@@ -184,14 +179,14 @@ const GirisYap = () => {
             <Typography variant="body2" color="text.secondary">
               Hesabınız yok mu?{' '}
               <Link 
-                to="/kayit" 
+                to="/ogretmen-kayit" 
                 style={{ 
                   color: '#1a237e', 
                   textDecoration: 'none', 
                   fontWeight: 'bold' 
                 }}
               >
-                Kayıt Ol
+                Öğretmen Kayıt Ol
               </Link>
             </Typography>
           </Box>
