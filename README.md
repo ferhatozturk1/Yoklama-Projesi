@@ -29,17 +29,13 @@ Projenin frontend kısmını yerel olarak çalıştırmak için aşağıdaki ad�
 1. Bağımlılıkları Yükleme
 İlk olarak, projeyi klonlayıp frontend klasörüne geçiş yapın ve gerekli bağımlılıkları yüklemek için aşağıdaki komutları çalıştırın:
 
-bash
-Kopyala
-Düzenle
+
 cd frontend
 npm install
+
 2. Uygulamayı Başlatma
 Bağımlılıklar yüklendikten sonra, uygulamayı geliştirme modunda başlatabilirsiniz:
 
-bash
-Kopyala
-Düzenle
 npm run dev
 Bu komut, geliştirme sunucusunu başlatacak ve genellikle http://localhost:3000 adresinde çalışmaya başlayacaktır. Tarayıcınızda bu adresi açarak uygulamanızı görüntüleyebilirsiniz.
 
@@ -58,16 +54,10 @@ Projeye katkıda bulunmak isterseniz, lütfen pull request göndermeden önce fo
 1. Feature Branch Oluşturma
 Geliştiricilerin proje üzerinde çalışabilmesi için, öncelikle feature branch oluşturulması gerekmektedir:
 
-bash
-Kopyala
-Düzenle
 git checkout -b feature/branch-name
 2. Commit ve Push İşlemleri
 Çalışmalarınızı tamamladıktan sonra commit ve push işlemleri gerçekleştirebilirsiniz:
 
-bash
-Kopyala
-Düzenle
 git add .
 git commit -m "Feature description"
 git push origin feature/branch-name
