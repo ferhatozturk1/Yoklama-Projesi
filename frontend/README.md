@@ -108,14 +108,8 @@ Ahmet | Yılmaz | 1001 | 10-A | ahmet@email.com
 3. Değişikliklerinizi commit edin
 4. Pull Request oluşturun
 
-## 👨‍💻 Geliştirici
 
-**Ferhat Öztürk**
-- GitHub: [@ferhatozturk1](https://github.com/ferhatozturk1)
 
----
-
-Made with ❤️ by Ferhat Öztürk
 ├── src/
 │   ├── components/         # React bileşenleri
 │   │   ├── GirisYap.js    # Giriş sayfası
