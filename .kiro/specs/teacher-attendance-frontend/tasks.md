@@ -144,6 +144,7 @@
 
     - Create WeeklyScheduleTable.jsx with interactive grid
     - Implement time slot selection and course entry
+
     - Add course information input modal
     - Create schedule validation and conflict detection
 
@@ -159,15 +160,21 @@
 
 - [ ] 8. Course Management System
 
-  - [ ] 8.1 Create course detail page
+  - [x] 8.1 Create course detail page
+
+
+
 
     - Build CourseDetail.jsx with comprehensive course information
     - Implement course metadata display
     - Add navigation between course sections
     - Create responsive layout for course details
+
     - _Requirements: 5.1, 5.4, 9.2_
 
-  - [ ] 8.2 Build student list management
+  - [x] 8.2 Build student list management
+
+
     - Create StudentUpload.jsx for file upload functionality
     - Implement file validation for .xlsx and .pdf formats
     - Add drag-and-drop upload interface
