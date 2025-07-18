@@ -1,197 +1,153 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Formik, Form, Field, ErrorMessage } from 'formik'
-import { useAuth } from '../context/AuthContext'
-import { loginValidationSchema } from '../utils/validators'
-import { showError, showSuccess, showInfo } from '../components/common/ToastNotification'
-import LoadingSpinner from '../components/common/LoadingSpinner'
-import logo from '../assets/logo.svg'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import Card from '../components/common/Card';
+import Button from '../components/common/Button';
+import Input from '../components/common/Input';
+import { showError, showSuccess } from '../components/common/ToastNotification';
+import logo from '../assets/logo.svg';
+import './Login.css';
 
 const Login = () => {
-  const navigate = useNavigate()
-  const { login } = useAuth()
-  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      setIsLoading(true)
-      const result = await login(values.email, values.password)
+      const result = await login(formData.email, formData.password);
       
       if (result.success) {
-        showSuccess('Giriş başarılı! Yönlendiriliyorsunuz...')
-        navigate('/dashboard')
+        showSuccess('Başarıyla giriş yaptınız!');
+        navigate('/dashboard');
       } else {
-        showError(result.error || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.')
-        
-        // Set specific field errors if available
-        if (result.error?.includes('email')) {
-          setFieldError('email', 'Geçersiz e-posta adresi')
-        } else if (result.error?.includes('password')) {
-          setFieldError('password', 'Geçersiz şifre')
-        }
+        showError(result.error || 'Giriş yapılırken bir hata oluştu');
       }
     } catch (error) {
-      console.error('Login error:', error)
-      showError('Bir hata oluştu. Lütfen tekrar deneyin.')
+      showError('Giriş yapılırken bir hata oluştu');
     } finally {
-      setIsLoading(false)
-      setSubmitting(false)
+      setLoading(false);
     }
-  }
+  };
 
+  console.log('Login component rendering...')
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <img 
-            src={logo} 
-            alt="Teacher Attendance System" 
-            className="mx-auto h-16 w-16 mb-4"
-          />
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: '#f8fafc', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      padding: '2rem'
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        padding: '2rem',
+        borderRadius: '1rem',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+        width: '100%',
+        maxWidth: '400px'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '0.5rem' }}>
+            EduTrack
+          </h1>
+          <p style={{ color: '#64748b' }}>
             Hoş Geldiniz
-          </h2>
-          <p className="text-gray-600">
-            Akademik Personel Paneli'ne giriş yapın
           </p>
         </div>
 
-        {/* Login Form */}
-        <div className="card">
-          <Formik
-            initialValues={{
-              email: '',
-              password: ''
-            }}
-            validationSchema={loginValidationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ isSubmitting, errors, touched }) => (
-              <Form className="space-y-6">
-                {/* Email Field */}
-                <div className="form-group">
-                  <label htmlFor="email" className="form-label">
-                    E-posta Adresi
-                  </label>
-                  <Field
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    className={`form-input ${
-                      errors.email && touched.email ? 'border-red-500' : ''
-                    }`}
-                    placeholder="ornek@universite.edu.tr"
-                  />
-                  <ErrorMessage 
-                    name="email" 
-                    component="div" 
-                    className="form-error" 
-                  />
-                </div>
-
-                {/* Password Field */}
-                <div className="form-group">
-                  <label htmlFor="password" className="form-label">
-                    Şifre
-                  </label>
-                  <Field
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    className={`form-input ${
-                      errors.password && touched.password ? 'border-red-500' : ''
-                    }`}
-                    placeholder="Şifrenizi giriniz"
-                  />
-                  <ErrorMessage 
-                    name="password" 
-                    component="div" 
-                    className="form-error" 
-                  />
-                </div>
-
-                {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <input
-                      id="remember-me"
-                      name="remember-me"
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                      Beni hatırla
-                    </label>
-                  </div>
-
-                  <div className="text-sm">
-                    <a 
-                      href="#" 
-                      className="font-medium text-blue-600 hover:text-blue-500"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        showInfo('Şifre sıfırlama özelliği yakında eklenecek.')
-                      }}
-                    >
-                      Şifremi unuttum
-                    </a>
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <div>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || isLoading}
-                    className="w-full btn btn-primary py-3 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center">
-                        <LoadingSpinner size="small" className="mr-2" />
-                        Giriş yapılıyor...
-                      </div>
-                    ) : (
-                      'Giriş Yap'
-                    )}
-                  </button>
-                </div>
-
-                {/* Register Link */}
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">
-                    Hesabınız yok mu?{' '}
-                    <Link 
-                      to="/register" 
-                      className="font-medium text-blue-600 hover:text-blue-500"
-                    >
-                      Kayıt olun
-                    </Link>
-                  </p>
-                </div>
-              </Form>
-            )}
-          </Formik>
-        </div>
-
-        {/* Demo Info */}
-        <div className="text-center">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-blue-800 mb-2">
-              Demo Bilgileri
-            </h3>
-            <p className="text-xs text-blue-600">
-              Backend henüz hazır olmadığı için giriş işlemi simüle edilmektedir.
-              <br />
-              Herhangi bir e-posta ve şifre ile giriş yapabilirsiniz.
-            </p>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#374151' }}>
+              E-posta Adresi
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="ornek@universite.edu.tr"
+              required
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                fontSize: '1rem'
+              }}
+            />
           </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#374151' }}>
+              Şifre
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Şifrenizi girin"
+              required
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                fontSize: '1rem'
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              backgroundColor: loading ? '#9ca3af' : '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              fontSize: '1rem',
+              fontWeight: '500',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+          </button>
+        </form>
+
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
+            Hesabınız yok mu?{' '}
+            <Link to="/register" style={{ color: '#3b82f6', textDecoration: 'none' }}>
+              Kayıt olun
+            </Link>
+          </p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

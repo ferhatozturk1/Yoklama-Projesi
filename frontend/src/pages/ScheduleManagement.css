@@ -1,0 +1,868 @@
+/* Modern Schedule Management Styles */
+.schedule-management {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-background), var(--color-surface));
+  padding: var(--space-6);
+}
+
+/* Header Section */
+.schedule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+  padding: var(--space-8);
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-hover));
+  border-radius: var(--radius-3xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.schedule-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, var(--color-primary-light), rgba(59, 130, 246, 0.1));
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+.schedule-header::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(135deg, var(--color-success-light), rgba(16, 185, 129, 0.1));
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite reverse;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+}
+
+.page-title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  max-width: 500px;
+}
+
+.header-actions {
+  position: relative;
+  z-index: 1;
+}
+
+/* Week Navigation */
+.week-navigation-card {
+  margin-bottom: var(--space-6);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .week-navigation-card {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.week-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+}
+
+.current-week {
+  text-align: center;
+  flex: 1;
+}
+
+.week-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.week-range {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Schedule Table */
+.schedule-table-card {
+  margin-bottom: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.schedule-table-container {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.schedule-table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.schedule-table-container::-webkit-scrollbar-track {
+  background: var(--color-surface-hover);
+}
+
+.schedule-table-container::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.schedule-table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 800px;
+}
+
+/* Table Headers */
+.time-header {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  color: white;
+  padding: var(--space-4);
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  width: 120px;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+}
+
+.day-header {
+  background: linear-gradient(135deg, var(--color-surface-hover), var(--color-surface));
+  border-bottom: 2px solid var(--color-primary);
+  padding: var(--space-4);
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  min-width: 180px;
+}
+
+.day-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.day-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.day-short {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Table Rows */
+.time-row {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.time-row:hover {
+  background: rgba(59, 130, 246, 0.02);
+}
+
+.time-cell {
+  background: var(--color-surface-hover);
+  border-right: 2px solid var(--color-border);
+  padding: var(--space-3);
+  text-align: center;
+  font-weight: var(--font-weight-medium);
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+.time-slot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.time-start {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.time-end {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Schedule Cells */
+.schedule-cell {
+  border-right: 1px solid var(--color-border);
+  padding: 0;
+  vertical-align: top;
+  position: relative;
+  min-height: 80px;
+  background: var(--color-surface);
+  transition: all var(--transition-base);
+}
+
+.schedule-cell.editable {
+  cursor: pointer;
+}
+
+.schedule-cell.editable:hover {
+  background: var(--color-primary-light);
+}
+
+.schedule-cell.has-course {
+  padding: 0;
+}
+
+.schedule-cell.empty-cell {
+  border: 2px dashed transparent;
+}
+
+.schedule-cell.editable.empty-cell:hover {
+  border-color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* Course Blocks */
+.course-block {
+  height: 100%;
+  padding: var(--space-3);
+  color: white;
+  border-radius: var(--radius-lg);
+  margin: var(--space-1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.course-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1));
+  pointer-events: none;
+}
+
+.course-block:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+  position: relative;
+  z-index: 1;
+}
+
+.course-code {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-base);
+  backdrop-filter: blur(10px);
+}
+
+.course-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-1);
+  line-height: 1.3;
+}
+
+.course-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-1);
+  font-size: var(--font-size-xs);
+  opacity: 0.9;
+}
+
+.course-instructor {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  opacity: 0.9;
+  margin-bottom: var(--space-1);
+  font-style: italic;
+}
+
+.course-time {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  opacity: 0.8;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.remove-course-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(10px);
+}
+
+.remove-course-btn:hover {
+  background: rgba(239, 68, 68, 0.8);
+  transform: scale(1.1);
+}
+
+.course-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
+  line-height: var(--line-height-tight);
+  position: relative;
+  z-index: 1;
+}
+
+.course-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+  position: relative;
+  z-index: 1;
+}
+
+.course-section,
+.course-classroom {
+  font-size: var(--font-size-xs);
+  opacity: 0.9;
+  font-weight: var(--font-weight-medium);
+}
+
+.course-time {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-base);
+  text-align: center;
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+}
+
+/* Empty Slots */
+.empty-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 80px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  gap: var(--space-2);
+  transition: all var(--transition-base);
+}
+
+.empty-slot svg {
+  opacity: 0.5;
+  transition: all var(--transition-base);
+}
+
+.schedule-cell.editable:hover .empty-slot {
+  color: var(--color-primary);
+}
+
+.schedule-cell.editable:hover .empty-slot svg {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Schedule Statistics */
+.schedule-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.stat-card {
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-hover));
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-base);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.stat-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon--primary {
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  color: var(--color-primary);
+}
+
+.stat-icon--success {
+  background: linear-gradient(135deg, var(--color-success-light), var(--color-success));
+  color: var(--color-success);
+}
+
+.stat-icon--warning {
+  background: linear-gradient(135deg, var(--color-warning-light), var(--color-warning));
+  color: var(--color-warning);
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1;
+  margin-bottom: var(--space-1);
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Course Selection Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: var(--color-surface);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-2xl);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-hover);
+}
+
+.modal-header h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.modal-close:hover {
+  background: var(--color-error-light);
+  color: var(--color-error);
+  transform: scale(1.1);
+}
+
+.modal-body {
+  padding: var(--space-6);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.course-selection-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.course-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface-hover);
+  border: 2px solid transparent;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.course-option:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+.course-color-indicator {
+  width: 16px;
+  height: 40px;
+  border-radius: var(--radius-base);
+  flex-shrink: 0;
+}
+
+.course-option .course-info {
+  flex: 1;
+}
+
+.course-option .course-code {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.course-option .course-name {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
+  line-height: var(--line-height-normal);
+}
+
+.course-option .course-details {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .schedule-header {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 768px) {
+  .schedule-management {
+    padding: var(--space-4);
+  }
+  
+  .schedule-header {
+    padding: var(--space-6);
+  }
+  
+  .page-title {
+    font-size: var(--font-size-3xl);
+  }
+  
+  .page-subtitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .week-navigation {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .schedule-table {
+    min-width: 600px;
+  }
+  
+  .day-header {
+    min-width: 120px;
+  }
+  
+  .time-header {
+    width: 80px;
+  }
+  
+  .course-block {
+    margin: 2px;
+    padding: var(--space-2);
+  }
+  
+  .course-name {
+    font-size: var(--font-size-xs);
+  }
+  
+  .schedule-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: var(--space-4);
+  }
+  
+  .course-selection-grid {
+    gap: var(--space-2);
+  }
+  
+  .course-option {
+    padding: var(--space-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .schedule-management {
+    padding: var(--space-3);
+  }
+  
+  .schedule-header {
+    padding: var(--space-4);
+  }
+  
+  .page-title {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .schedule-table {
+    min-width: 500px;
+  }
+  
+  .day-header {
+    min-width: 100px;
+    padding: var(--space-2);
+  }
+  
+  .time-header {
+    width: 60px;
+    padding: var(--space-2);
+  }
+  
+  .time-cell {
+    padding: var(--space-2);
+  }
+  
+  .course-block {
+    padding: var(--space-1);
+  }
+  
+  .stat-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-3);
+  }
+}
+
+/* Animation Keyframes */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-20px) rotate(180deg); 
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Dark Theme Adjustments */
+[data-theme="dark"] .schedule-header {
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-hover));
+}
+
+[data-theme="dark"] .time-header {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+}
+
+[data-theme="dark"] .day-header {
+  background: linear-gradient(135deg, var(--color-surface-hover), var(--color-surface));
+  border-bottom-color: var(--color-primary);
+}
+
+[data-theme="dark"] .time-cell {
+  background: var(--color-surface-hover);
+}
+
+[data-theme="dark"] .schedule-cell {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .stat-card {
+  background: linear-gradient(135deg, var(--color-surface), var(--color-surface-hover));
+}
+
+[data-theme="dark"] .modal-content {
+  background: var(--color-surface);
+}
+
+[data-theme="dark"] .modal-header {
+  background: var(--color-surface-hover);
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme="dark"] .course-option {
+  background: var(--color-surface-hover);
+}
+
+[data-theme="dark"] .course-option:hover {
+  background: var(--color-primary-light);
+}
+
+/* Performance Optimizations */
+.schedule-table,
+.course-block,
+.stat-card {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  .schedule-header::before,
+  .schedule-header::after,
+  .course-block,
+  .stat-card,
+  .modal-content {
+    animation: none;
+    transition: none;
+  }
+  
+  .course-block:hover,
+  .stat-card:hover,
+  .course-option:hover {
+    transform: none;
+  }
+}
+
+/* Focus Styles */
+.schedule-cell:focus-visible,
+.course-option:focus-visible,
+.modal-close:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .schedule-management {
+    background: white;
+    padding: 0;
+  }
+  
+  .schedule-header,
+  .header-actions,
+  .week-navigation,
+  .schedule-stats-grid {
+    display: none;
+  }
+  
+  .schedule-table-card {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .schedule-table {
+    font-size: 12px;
+  }
+  
+  .course-block {
+    background: #f0f0f0 !important;
+    color: #000 !important;
+    box-shadow: none;
+  }
+}

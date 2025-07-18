@@ -1,66 +1,190 @@
-import React from 'react'
-import Layout from '../components/layout/Layout'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Layout from '../components/layout/Layout';
+import Card from '../components/common/Card';
+import Button from '../components/common/Button';
+import Input from '../components/common/Input';
+import './Courses.css';
 
 const Courses = () => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSemester, setSelectedSemester] = useState('all');
+
+  const courses = [
+    {
+      id: '1',
+      code: 'BIL101',
+      name: 'Bilgisayar Programlama I',
+      section: '1',
+      classroom: 'A-201',
+      studentCount: 32,
+      attendanceRate: 85,
+      color: '#3B82F6',
+      schedule: 'Pazartesi 09:00-11:00',
+      semester: '2024-fall'
+    },
+    {
+      id: '2',
+      code: 'BIL102',
+      name: 'Bilgisayar Programlama II',
+      section: '2',
+      classroom: 'A-202',
+      studentCount: 28,
+      attendanceRate: 92,
+      color: '#10B981',
+      schedule: 'Çarşamba 13:00-15:00',
+      semester: '2024-fall'
+    },
+    {
+      id: '3',
+      code: 'MAT201',
+      name: 'Matematik I',
+      section: '1',
+      classroom: 'B-101',
+      studentCount: 25,
+      attendanceRate: 78,
+      color: '#F59E0B',
+      schedule: 'Cuma 10:00-12:00',
+      semester: '2024-fall'
+    }
+  ];
+
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         course.code.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSemester = selectedSemester === 'all' || course.semester === selectedSemester;
+    return matchesSearch && matchesSemester;
+  });
+
   return (
-    <Layout showSidebar={true}>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Derslerim</h1>
-            <p className="text-gray-600">
-              Verdiğiniz dersleri yönetin ve öğrenci listelerini düzenleyin
-            </p>
+    <Layout>
+      <div className="courses-page">
+        <div className="courses-header">
+          <div className="header-content">
+            <h1 className="page-title">Derslerim</h1>
+            <p className="page-subtitle">Verdiğiniz dersleri yönetin ve öğrenci listelerini düzenleyin</p>
           </div>
-
-          {/* Action Bar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Ders ara..."
-                  className="form-input pl-10 pr-4 py-2 w-64"
-                />
-                <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <select className="form-input">
-                <option value="">Tüm Dönemler</option>
-                <option value="2024-fall">2024 Güz</option>
-                <option value="2024-spring">2024 Bahar</option>
-              </select>
-            </div>
-            <button className="btn btn-primary">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          <Button 
+            variant="primary" 
+            size="lg"
+            icon={
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
-              Yeni Ders Ekle
-            </button>
-          </div>
-
-          {/* Courses Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Empty State */}
-            <div className="col-span-full">
-              <div className="text-center py-12">
-                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Henüz ders eklenmemiş</h3>
-                <p className="text-gray-600 mb-4">İlk dersinizi ekleyerek başlayın</p>
-                <button className="btn btn-primary">
-                  Ders Ekle
-                </button>
-              </div>
-            </div>
-          </div>
+            }
+          >
+            Yeni Ders Ekle
+          </Button>
         </div>
+
+        <Card className="filters-card">
+          <div className="filters-content">
+            <Input
+              placeholder="Ders ara..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              icon={
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="M21 21l-4.35-4.35"/>
+                </svg>
+              }
+              clearable
+            />
+            <select 
+              value={selectedSemester}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+              className="semester-select"
+            >
+              <option value="all">Tüm Dönemler</option>
+              <option value="2024-fall">2024 Güz</option>
+              <option value="2024-spring">2024 Bahar</option>
+            </select>
+          </div>
+        </Card>
+
+        {filteredCourses.length === 0 ? (
+          <Card className="empty-state-card">
+            <div className="empty-state">
+              <div className="empty-icon">📚</div>
+              <h3 className="empty-title">Henüz ders eklenmemiş</h3>
+              <p className="empty-description">İlk dersinizi ekleyerek başlayın</p>
+              <Button variant="primary" className="empty-action">
+                Ders Ekle
+              </Button>
+            </div>
+          </Card>
+        ) : (
+          <div className="courses-grid">
+            {filteredCourses.map(course => (
+              <Card 
+                key={course.id} 
+                className="course-card"
+                hover
+                clickable
+                onClick={() => navigate(`/course/${course.id}`)}
+              >
+                <div className="course-header" style={{ backgroundColor: course.color }}>
+                  <div className="course-code">{course.code}</div>
+                  <div className="course-section">Bölüm {course.section}</div>
+                </div>
+                
+                <Card.Body>
+                  <Card.Title level={3}>{course.name}</Card.Title>
+                  
+                  <div className="course-info">
+                    <div className="info-item">
+                      <span className="info-icon">🏫</span>
+                      <span>{course.classroom}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-icon">👥</span>
+                      <span>{course.studentCount} öğrenci</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-icon">📊</span>
+                      <span>%{course.attendanceRate} devam</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-icon">⏰</span>
+                      <span>{course.schedule}</span>
+                    </div>
+                  </div>
+                </Card.Body>
+
+                <Card.Footer>
+                  <div className="course-actions">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/attendance/${course.id}`);
+                      }}
+                    >
+                      Yoklama Al
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/course/${course.id}`);
+                      }}
+                    >
+                      Detaylar
+                    </Button>
+                  </div>
+                </Card.Footer>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
-  )
-}
+  );
+};
 
-export default Courses
+export default Courses;

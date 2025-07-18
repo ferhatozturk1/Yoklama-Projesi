@@ -13,7 +13,17 @@
     "yup": "^1.0.0",
     "react-dropzone": "^14.2.3",
     "jspdf": "^2.5.0",
-    "react-toastify": "^9.1.0"
+    "react-toastify": "^9.1.0",
+    "react-icons": "^4.8.0",
+    "framer-motion": "^10.0.0",
+    "react-query": "^3.39.0",
+    "react-hook-form": "^7.43.0",
+    "recharts": "^2.5.0",
+    "react-select": "^5.7.0",
+    "react-datepicker": "^4.10.0",
+    "react-hot-toast": "^2.4.0",
+    "clsx": "^1.2.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.0",

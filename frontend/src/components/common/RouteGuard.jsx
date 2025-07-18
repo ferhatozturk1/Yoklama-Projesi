@@ -10,10 +10,16 @@ const RouteGuard = ({ children, requireAuth = true, redirectTo = '/login' }) => 
   // Show loading spinner while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: '#f8fafc'
+      }}>
+        <div style={{ textAlign: 'center' }}>
           <LoadingSpinner size="large" />
-          <p className="mt-4 text-gray-600">Yükleniyor...</p>
+          <p style={{ marginTop: '1rem', color: '#64748b' }}>Yükleniyor...</p>
         </div>
       </div>
     )

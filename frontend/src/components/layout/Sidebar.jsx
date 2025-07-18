@@ -1,126 +1,263 @@
-import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import logo from '../../assets/logo.svg';
+import './Sidebar.css';
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const location = useLocation()
+  const location = useLocation();
+  const { user } = useAuth();
+  const { theme } = useTheme();
+  const [isCollapsed, setIsCollapsed] = useState(false);
   
   const menuItems = [
     {
       name: 'Ana Panel',
       path: '/dashboard',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
         </svg>
-      )
+      ),
+      badge: null
     },
     {
       name: 'Derslerim',
       path: '/courses',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
         </svg>
-      )
+      ),
+      badge: '3'
     },
     {
-      name: 'Yoklama Yönetimi',
+      name: 'Yoklama',
       path: '/attendance',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22,4 12,14.01 9,11.01"/>
         </svg>
-      )
+      ),
+      badge: null
+    },
+    {
+      name: 'Program',
+      path: '/schedule',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      ),
+      badge: null
     },
     {
       name: 'Raporlar',
       path: '/reports',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+      ),
+      badge: null
+    }
+  ];
+
+  const settingsItems = [
+    {
+      name: 'Takvim Ayarları',
+      path: '/calendar-settings',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
         </svg>
       )
     },
     {
-      name: 'Profilim',
+      name: 'Profil',
       path: '/profile',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
         </svg>
       )
     }
-  ]
+  ];
 
   const isActiveRoute = (path) => {
-    return location.pathname === path
-  }
+    return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+          className="sidebar-overlay"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        {/* Sidebar header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 lg:hidden">
-          <span className="text-lg font-semibold text-gray-900">Menü</span>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      <div className={`sidebar ${isOpen ? 'sidebar--open' : ''} ${isCollapsed ? 'sidebar--collapsed' : ''}`}>
+        {/* Sidebar Header */}
+        <div className="sidebar-header">
+          <div className="sidebar-brand">
+            <div className="brand-logo">
+              <img src={logo} alt="EduTrack Logo" />
+            </div>
+            {!isCollapsed && (
+              <div className="brand-info">
+                <h2 className="brand-title">EduTrack</h2>
+                <p className="brand-subtitle">Akıllı Yoklama</p>
+              </div>
+            )}
+          </div>
+          
+          {/* Mobile Close Button */}
+          <button className="sidebar-close-btn" onClick={onClose}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+
+          {/* Desktop Collapse Button */}
+          <button className="sidebar-collapse-btn" onClick={toggleCollapse}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="15,18 9,12 15,6"/>
             </svg>
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="mt-8 px-4">
-          <ul className="space-y-2">
-            {menuItems.map((item) => (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  onClick={onClose}
-                  className={`
-                    flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200
-                    ${isActiveRoute(item.path)
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                    }
-                  `}
-                >
-                  <span className={`mr-3 ${isActiveRoute(item.path) ? 'text-blue-700' : 'text-gray-400'}`}>
-                    {item.icon}
-                  </span>
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        {/* User Profile Section */}
+        <div className="sidebar-user">
+          <div className="user-avatar">
+            {user?.profilePhoto ? (
+              <img src={user.profilePhoto} alt="Profile" />
+            ) : (
+              <div className="avatar-placeholder">
+                {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+              </div>
+            )}
+            <div className="user-status"></div>
+          </div>
+          {!isCollapsed && (
+            <div className="user-info">
+              <div className="user-name">
+                {user?.title} {user?.firstName} {user?.lastName}
+              </div>
+              <div className="user-role">Öğretim Görevlisi</div>
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Menu */}
+        <nav className="sidebar-nav">
+          <div className="nav-section">
+            {!isCollapsed && <div className="nav-section-title">Ana Menü</div>}
+            <ul className="nav-list">
+              {menuItems.map((item) => (
+                <li key={item.path} className="nav-item">
+                  <Link
+                    to={item.path}
+                    onClick={onClose}
+                    className={`nav-link ${isActiveRoute(item.path) ? 'nav-link--active' : ''}`}
+                    title={isCollapsed ? item.name : ''}
+                  >
+                    <span className="nav-icon">{item.icon}</span>
+                    {!isCollapsed && (
+                      <>
+                        <span className="nav-text">{item.name}</span>
+                        {item.badge && (
+                          <span className="nav-badge">{item.badge}</span>
+                        )}
+                      </>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="nav-section">
+            {!isCollapsed && <div className="nav-section-title">Ayarlar</div>}
+            <ul className="nav-list">
+              {settingsItems.map((item) => (
+                <li key={item.path} className="nav-item">
+                  <Link
+                    to={item.path}
+                    onClick={onClose}
+                    className={`nav-link ${isActiveRoute(item.path) ? 'nav-link--active' : ''}`}
+                    title={isCollapsed ? item.name : ''}
+                  >
+                    <span className="nav-icon">{item.icon}</span>
+                    {!isCollapsed && <span className="nav-text">{item.name}</span>}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </nav>
 
-        {/* Sidebar footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <div className="text-xs text-gray-500 text-center">
-            <p>Teacher Attendance System</p>
-            <p className="mt-1">v1.0.0</p>
+        {/* Quick Stats */}
+        {!isCollapsed && (
+          <div className="sidebar-stats">
+            <div className="stats-header">
+              <h4>Bu Hafta</h4>
+            </div>
+            <div className="stats-grid">
+              <div className="stat-item">
+                <div className="stat-number">12</div>
+                <div className="stat-label">Ders</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-number">89%</div>
+                <div className="stat-label">Devam</div>
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* Sidebar Footer */}
+        <div className="sidebar-footer">
+          {!isCollapsed ? (
+            <div className="footer-content">
+              <div className="app-version">
+                <span className="version-label">EduTrack</span>
+                <span className="version-number">v2.1.0</span>
+              </div>
+              <div className="footer-links">
+                <a href="#" className="footer-link">Yardım</a>
+                <a href="#" className="footer-link">Destek</a>
+              </div>
+            </div>
+          ) : (
+            <div className="footer-collapsed">
+              <div className="version-dot"></div>
+            </div>
+          )}
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

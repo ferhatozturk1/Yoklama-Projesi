@@ -1,134 +1,314 @@
-import React, { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
-import Layout from '../components/layout/Layout'
-import ProfileCard from '../components/profile/ProfileCard'
-import ProfileForm from '../components/profile/ProfileForm'
-import ProfilePDFDownload from '../components/profile/ProfilePDFDownload'
-import UploadProfilePhoto from '../components/profile/UploadProfilePhoto'
-import { showSuccess } from '../components/common/ToastNotification'
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import Layout from '../components/layout/Layout';
+import Card from '../components/common/Card';
+import Button from '../components/common/Button';
+import Input from '../components/common/Input';
+import { showSuccess, showError } from '../components/common/ToastNotification';
+import './Profile.css';
 
 const Profile = () => {
-  const { user, updateUser } = useAuth()
-  const [isEditing, setIsEditing] = useState(false)
-  const [showPhotoUpload, setShowPhotoUpload] = useState(false)
+  const { user, updateUser } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    title: user?.title || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    department: user?.department || '',
+    university: user?.university || '',
+    bio: user?.bio || ''
+  });
 
-  const handleEdit = () => {
-    setIsEditing(true)
-  }
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
-  const handleSave = async (updatedData) => {
-    // In demo mode, just update the context
-    updateUser(updatedData)
-    setIsEditing(false)
-    showSuccess('Profil başarıyla güncellendi!')
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      updateUser(formData);
+      setIsEditing(false);
+      showSuccess('Profil başarıyla güncellendi!');
+    } catch (error) {
+      showError('Profil güncellenirken bir hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCancel = () => {
-    setIsEditing(false)
-  }
-
-  const handlePhotoUpdate = async (photoUrl) => {
-    updateUser({ profilePhoto: photoUrl })
-    setShowPhotoUpload(false)
-  }
-
-  const handleDownloadPDF = () => {
-    // This will be handled by the ProfilePDFDownload component
-  }
+    setFormData({
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      title: user?.title || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      department: user?.department || '',
+      university: user?.university || '',
+      bio: user?.bio || ''
+    });
+    setIsEditing(false);
+  };
 
   return (
-    <Layout showSidebar={true}>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Profil Bilgileri</h1>
-            <p className="text-gray-600">
-              Kişisel ve akademik bilgilerinizi görüntüleyin ve düzenleyin
-            </p>
-          </div>
+    <Layout>
+      <div className="profile-page">
+        <div className="profile-header">
+          <h1 className="page-title">Profil Ayarları</h1>
+          <p className="page-subtitle">Kişisel bilgilerinizi yönetin ve güncelleyin</p>
+        </div>
 
-          {/* Main Content */}
-          {isEditing ? (
-            <ProfileForm 
-              user={user}
-              onSave={handleSave}
-              onCancel={handleCancel}
-            />
-          ) : (
-            <div className="space-y-8">
-              {/* Profile Card */}
-              <ProfileCard 
-                user={user}
-                onEdit={handleEdit}
-                onDownloadPDF={handleDownloadPDF}
-              />
-
-              {/* Additional Sections */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Photo Upload */}
-                <UploadProfilePhoto
-                  currentPhoto={user?.profilePhoto}
-                  onPhotoUpdate={handlePhotoUpdate}
-                />
-
-                {/* PDF Download */}
-                <ProfilePDFDownload
-                  user={user}
-                  courses={[]} // Will be populated when courses are implemented
-                />
+        <div className="profile-grid">
+          {/* Profile Card */}
+          <Card className="profile-card">
+            <div className="profile-avatar-section">
+              <div className="profile-avatar-large">
+                {user?.profilePhoto ? (
+                  <img src={user.profilePhoto} alt="Profile" />
+                ) : (
+                  <div className="avatar-placeholder-large">
+                    {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                  </div>
+                )}
               </div>
-
-              {/* Courses Section */}
-              <div className="card">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-gray-900">Verilen Dersler</h3>
-                  <button className="btn btn-primary">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Ders Ekle
-                  </button>
-                </div>
-                
-                <div className="text-center py-12 text-gray-500">
-                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">Henüz ders eklenmemiş</h4>
-                  <p className="text-sm text-gray-600 mb-4">Verdiğiniz dersleri ekleyerek başlayın</p>
-                  <button className="btn btn-primary">
-                    İlk Dersinizi Ekleyin
-                  </button>
-                </div>
+              <div className="profile-info">
+                <h2 className="profile-name">
+                  {user?.title} {user?.firstName} {user?.lastName}
+                </h2>
+                <p className="profile-email">{user?.email}</p>
+                <p className="profile-department">{user?.department}</p>
               </div>
-
-              {/* Academic Calendar */}
-              <div className="card">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-gray-900">Akademik Takvim</h3>
-                  <button className="btn btn-secondary">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    Takvim Yükle
-                  </button>
-                </div>
-                
-                <div className="text-center py-8 text-gray-500">
-                  <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <p className="text-sm font-medium text-gray-700 mb-1">Akademik takvim dosyası yüklenmemiş</p>
-                  <p className="text-xs text-gray-500">PDF formatında akademik takvim dosyanızı yükleyebilirsiniz</p>
-                </div>
-              </div>
+              <Button variant="outline" size="sm">
+                Fotoğraf Değiştir
+              </Button>
             </div>
-          )}
+          </Card>
+
+          {/* Personal Information */}
+          <Card className="info-card">
+            <Card.Header>
+              <Card.Title>Kişisel Bilgiler</Card.Title>
+              {!isEditing && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  icon={
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  }
+                >
+                  Düzenle
+                </Button>
+              )}
+            </Card.Header>
+
+            <Card.Body>
+              {isEditing ? (
+                <form onSubmit={handleSubmit} className="profile-form">
+                  <div className="form-row">
+                    <Input
+                      label="Unvan"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="Dr., Prof. Dr., vb."
+                    />
+                    <Input
+                      label="Ad"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <Input
+                      label="Soyad"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                    />
+                    <Input
+                      label="E-posta"
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <Input
+                      label="Telefon"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+90 (555) 123 45 67"
+                    />
+                    <Input
+                      label="Bölüm"
+                      name="department"
+                      value={formData.department}
+                      onChange={handleChange}
+                      placeholder="Bilgisayar Mühendisliği"
+                    />
+                  </div>
+
+                  <Input
+                    label="Üniversite"
+                    name="university"
+                    value={formData.university}
+                    onChange={handleChange}
+                    placeholder="İstanbul Teknik Üniversitesi"
+                  />
+
+                  <div className="form-group">
+                    <label className="form-label">Biyografi</label>
+                    <textarea
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleChange}
+                      placeholder="Kendiniz hakkında kısa bir açıklama yazın..."
+                      rows={4}
+                      className="form-textarea"
+                    />
+                  </div>
+
+                  <div className="form-actions">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleCancel}
+                    >
+                      İptal
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      variant="primary" 
+                      loading={loading}
+                    >
+                      Kaydet
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="profile-display">
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <label>Ad Soyad</label>
+                      <span>{user?.title} {user?.firstName} {user?.lastName}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>E-posta</label>
+                      <span>{user?.email}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Telefon</label>
+                      <span>{user?.phone || 'Belirtilmemiş'}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Bölüm</label>
+                      <span>{user?.department || 'Belirtilmemiş'}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Üniversite</label>
+                      <span>{user?.university || 'Belirtilmemiş'}</span>
+                    </div>
+                    <div className="info-item full-width">
+                      <label>Biyografi</label>
+                      <span>{user?.bio || 'Henüz biyografi eklenmemiş.'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+
+          {/* Account Settings */}
+          <Card className="settings-card">
+            <Card.Header>
+              <Card.Title>Hesap Ayarları</Card.Title>
+            </Card.Header>
+            <Card.Body>
+              <div className="settings-list">
+                <div className="setting-item">
+                  <div className="setting-info">
+                    <h4>Şifre Değiştir</h4>
+                    <p>Hesap güvenliğiniz için düzenli olarak şifrenizi değiştirin</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Değiştir
+                  </Button>
+                </div>
+
+                <div className="setting-item">
+                  <div className="setting-info">
+                    <h4>İki Faktörlü Doğrulama</h4>
+                    <p>Hesabınızı daha güvenli hale getirin</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Etkinleştir
+                  </Button>
+                </div>
+
+                <div className="setting-item">
+                  <div className="setting-info">
+                    <h4>Bildirim Ayarları</h4>
+                    <p>E-posta ve sistem bildirimlerini yönetin</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Ayarla
+                  </Button>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+
+          {/* Statistics */}
+          <Card className="stats-card">
+            <Card.Header>
+              <Card.Title>İstatistikler</Card.Title>
+            </Card.Header>
+            <Card.Body>
+              <div className="stats-grid">
+                <div className="stat-item">
+                  <div className="stat-number">12</div>
+                  <div className="stat-label">Toplam Ders</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-number">245</div>
+                  <div className="stat-label">Toplam Öğrenci</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-number">89%</div>
+                  <div className="stat-label">Ortalama Devam</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-number">156</div>
+                  <div className="stat-label">Yoklama Sayısı</div>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
         </div>
       </div>
     </Layout>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;
