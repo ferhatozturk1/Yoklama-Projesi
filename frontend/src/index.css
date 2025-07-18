@@ -86,7 +86,7 @@ code {
   color: white;
 }
 
-.btn-error {
+.btn-error, .btn-danger {
   background-color: var(--error-color);
   color: white;
 }

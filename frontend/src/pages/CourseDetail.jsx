@@ -3,12 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/layout/Layout'
 import CourseDetailCard from '../components/course/CourseDetailCard'
 import AttendanceTable from '../components/course/AttendanceTable'
+import AttendanceHistoryTable from '../components/course/AttendanceHistoryTable'
+import AttendanceDetailsModal from '../components/course/AttendanceDetailsModal'
 import StartSessionModal from '../components/course/StartSessionModal'
+import QRCodeModal from '../components/course/QRCodeModal'
+import SessionControls from '../components/course/SessionControls'
+import SessionEndModal from '../components/course/SessionEndModal'
 import StudentUpload from '../components/course/StudentUpload'
 import StudentList from '../components/course/StudentList'
 import StudentEditModal from '../components/course/StudentEditModal'
 import { useCalendar } from '../context/CalendarContext'
 import { canStartClass } from '../utils/calendarRestrictions'
+import { exportAttendance } from '../utils/exportUtils'
 import { showError, showSuccess, showWarning } from '../components/common/ToastNotification'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 
@@ -110,7 +116,11 @@ const CourseDetail = () => {
   const [activeSession, setActiveSession] = useState(null)
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isQRCodeModalOpen, setIsQRCodeModalOpen] = useState(false)
+  const [isEndSessionModalOpen, setIsEndSessionModalOpen] = useState(false)
+  const [isAttendanceDetailsModalOpen, setIsAttendanceDetailsModalOpen] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
+  const [selectedSession, setSelectedSession] = useState(null)
   
   useEffect(() => {
     const loadCourseData = async () => {
@@ -138,6 +148,17 @@ const CourseDetail = () => {
     }
     
     loadCourseData()
+    
+    // Add event listener for showing QR code
+    const handleShowQRCode = () => {
+      setIsQRCodeModalOpen(true)
+    }
+    
+    window.addEventListener('show-qr-code', handleShowQRCode)
+    
+    return () => {
+      window.removeEventListener('show-qr-code', handleShowQRCode)
+    }
   }, [courseId])
   
   const handleStartSession = (sessionData) => {
@@ -150,6 +171,45 @@ const CourseDetail = () => {
     
     // Switch to the students tab
     setActiveTab('students')
+    
+    // Show QR code modal
+    setIsQRCodeModalOpen(true)
+  }
+  
+  const handleEndSession = () => {
+    // Show end session confirmation modal
+    setIsEndSessionModalOpen(true)
+  }
+  
+  const confirmEndSession = (notes) => {
+    // In a real app, we would save this to the backend
+    
+    // Save attendance data to history
+    const newHistoryEntry = {
+      id: `session-${Date.now()}`,
+      date: new Date(),
+      type: activeSession?.type || 'regular',
+      notes: notes,
+      presentCount: attendanceData.filter(a => a.status === 'present').length,
+      absentCount: attendanceData.filter(a => a.status === 'absent').length,
+      excusedCount: attendanceData.filter(a => a.status === 'excused').length
+    }
+    
+    setAttendanceHistory([newHistoryEntry, ...attendanceHistory])
+    setActiveSession(null)
+    showSuccess('Ders başarıyla sonlandırıldı.')
+  }
+  
+  const handlePauseSession = () => {
+    // In a real app, we would save this to the backend
+    const updatedSession = { ...activeSession, status: 'paused' }
+    setActiveSession(updatedSession)
+  }
+  
+  const handleResumeSession = () => {
+    // In a real app, we would save this to the backend
+    const updatedSession = { ...activeSession, status: 'active' }
+    setActiveSession(updatedSession)
   }
   
   const handleAttendanceUpdate = (studentId, status) => {
@@ -268,7 +328,10 @@ const CourseDetail = () => {
                   Liste Yükle
                 </button>
                 {activeSession && (
-                  <button className="btn btn-primary">
+                  <button 
+                    className="btn btn-primary"
+                    onClick={() => setIsQRCodeModalOpen(true)}
+                  >
                     QR Kodu Göster
                   </button>
                 )}
@@ -281,6 +344,8 @@ const CourseDetail = () => {
                 attendanceData={attendanceData}
                 onAttendanceUpdate={handleAttendanceUpdate}
                 isLoading={false}
+                session={activeSession}
+                autoSave={true}
               />
             ) : students.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
@@ -316,67 +381,36 @@ const CourseDetail = () => {
                 <p className="text-sm">Ders başlattığınızda yoklama kayıtları burada görünecektir</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tarih
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tür
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Var
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Yok
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Mazeretli
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        İşlemler
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {attendanceHistory.map(session => (
-                      <tr key={session.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {session.date.toLocaleDateString('tr-TR')}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            session.type === 'makeup' 
-                              ? 'bg-yellow-100 text-yellow-800' 
-                              : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {session.type === 'makeup' ? 'Telafi' : 'Normal'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {session.presentCount}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {session.absentCount}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {session.excusedCount}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <button className="text-blue-600 hover:text-blue-900 mr-3">
-                            Görüntüle
-                          </button>
-                          <button className="text-blue-600 hover:text-blue-900">
-                            PDF
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <AttendanceHistoryTable 
+                attendanceHistory={attendanceHistory}
+                isLoading={false}
+                onViewDetails={(session) => {
+                  setSelectedSession(session)
+                  setIsAttendanceDetailsModalOpen(true)
+                }}
+                onExport={(format, filteredHistory, dateRange) => {
+                  try {
+                    // Export attendance history
+                    exportAttendance(format, {
+                      type: 'history',
+                      sessions: filteredHistory
+                    }, {
+                      title: `${course.code} - Yoklama Geçmişi`,
+                      fileName: `${course.code.toLowerCase()}-yoklama-gecmisi.${format}`,
+                      courseInfo: course,
+                      dateRange: {
+                        startDate: dateRange?.startDate,
+                        endDate: dateRange?.endDate
+                      }
+                    })
+                    
+                    showSuccess(`${format.toUpperCase()} formatında dışa aktarma tamamlandı.`)
+                  } catch (error) {
+                    console.error('Error exporting attendance:', error)
+                    showError('Dışa aktarma sırasında bir hata oluştu.')
+                  }
+                }}
+              />
             )}
           </div>
         )
@@ -392,9 +426,35 @@ const CourseDetail = () => {
                 <p className="text-gray-600 mb-4">
                   Tüm öğrencilerin devam durumunu gösteren detaylı rapor.
                 </p>
-                <button className="btn btn-secondary">
-                  PDF İndir
-                </button>
+                <div className="flex space-x-2">
+                  <button 
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      try {
+                        exportAttendance('pdf', {
+                          type: 'history',
+                          sessions: attendanceHistory
+                        }, {
+                          title: `${course.code} - Devam Durumu Raporu`,
+                          fileName: `${course.code.toLowerCase()}-devam-raporu.pdf`,
+                          courseInfo: course
+                        })
+                        showSuccess('PDF formatında dışa aktarma tamamlandı.')
+                      } catch (error) {
+                        console.error('Error exporting attendance:', error)
+                        showError('Dışa aktarma sırasında bir hata oluştu.')
+                      }
+                    }}
+                  >
+                    PDF İndir
+                  </button>
+                  <button 
+                    className="btn btn-primary"
+                    onClick={() => navigate(`/reports/${courseId}`)}
+                  >
+                    Detaylı Rapor
+                  </button>
+                </div>
               </div>
               
               <div className="p-6 bg-white border rounded-lg shadow-sm">
@@ -402,10 +462,34 @@ const CourseDetail = () => {
                 <p className="text-gray-600 mb-4">
                   Haftalık bazda yoklama istatistiklerini içeren özet rapor.
                 </p>
-                <button className="btn btn-secondary">
+                <button 
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    try {
+                      exportAttendance('excel', {
+                        type: 'history',
+                        sessions: attendanceHistory
+                      }, {
+                        title: `${course.code} - Haftalık Yoklama Özeti`,
+                        fileName: `${course.code.toLowerCase()}-haftalik-ozet.xlsx`,
+                        courseInfo: course
+                      })
+                      showSuccess('Excel formatında dışa aktarma tamamlandı.')
+                    } catch (error) {
+                      console.error('Error exporting attendance:', error)
+                      showError('Dışa aktarma sırasında bir hata oluştu.')
+                    }
+                  }}
+                >
                   Excel İndir
                 </button>
               </div>
+            </div>
+            
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>İpucu:</strong> Daha detaylı raporlar ve özelleştirilmiş dışa aktarma seçenekleri için "Detaylı Rapor" sayfasını kullanabilirsiniz.
+              </p>
             </div>
           </div>
         )
@@ -454,6 +538,16 @@ const CourseDetail = () => {
 
           {/* Course Info Card */}
           {course && <CourseDetailCard course={course} />}
+          
+          {/* Active Session Controls */}
+          {activeSession && (
+            <SessionControls
+              session={activeSession}
+              onEndSession={handleEndSession}
+              onPauseSession={handlePauseSession}
+              onResumeSession={handleResumeSession}
+            />
+          )}
 
           {/* Tabs */}
           <div className="mb-6">
@@ -524,6 +618,39 @@ const CourseDetail = () => {
         student={selectedStudent}
         onSave={handleSaveStudent}
       />
+      
+      {course && activeSession && (
+        <QRCodeModal
+          isOpen={isQRCodeModalOpen}
+          onClose={() => setIsQRCodeModalOpen(false)}
+          session={activeSession}
+          course={course}
+        />
+      )}
+      
+      {course && activeSession && (
+        <SessionEndModal
+          isOpen={isEndSessionModalOpen}
+          onClose={() => setIsEndSessionModalOpen(false)}
+          onConfirm={confirmEndSession}
+          session={activeSession}
+          attendanceData={attendanceData}
+          students={students}
+        />
+      )}
+      
+      {course && selectedSession && (
+        <AttendanceDetailsModal
+          isOpen={isAttendanceDetailsModalOpen}
+          onClose={() => {
+            setIsAttendanceDetailsModalOpen(false)
+            setSelectedSession(null)
+          }}
+          session={selectedSession}
+          courseId={courseId}
+          courseInfo={course}
+        />
+      )}
     </Layout>
   )
 }
