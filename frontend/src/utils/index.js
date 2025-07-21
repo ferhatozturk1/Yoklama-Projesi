@@ -13,5 +13,29 @@ export * from "./validationUtils";
 export * from "./academicValidations";
 export * from "./fileValidations";
 
+// Responsive utilities
+export * from "./responsiveUtils";
+
+// API utilities
+export { default as apiClient, apiRequest } from "./apiClient";
+export * from "./apiErrorHandler";
+export * from "./apiValidator";
+export * from "./apiCache";
+
+// Performance utilities
+export { default as cacheManager } from "./cacheManager";
+export * from "./routePrefetcher";
+export { default as imageOptimizer } from "./imageOptimizer";
+export { default as memoHelpers } from "./memoHelpers";
+export { default as contextOptimizer } from "./contextOptimizer";
+
+// Accessibility utilities
+export { default as accessibilityUtils } from "./accessibilityUtils";
+
+// Browser compatibility utilities
+export { default as browserUtils } from "./browserUtils";
+
+// Error reporting utilities
+export { default as errorReporter } from "./errorReporter";
+
 // Other utilities can be added here as they are created
-export { default as apiClient } from "./apiClient";

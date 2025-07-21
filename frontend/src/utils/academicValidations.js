@@ -1,435 +1,405 @@
 /**
- * Academic-specific validation rules and utilities
+ * Academic-specific validation utilities
  */
+import { format, isValid, parseISO, differenceInDays, differenceInWeeks, isWithinInterval } from 'date-fns'
+import { tr } from 'date-fns/locale'
 
 /**
- * Validate academic calendar restrictions
- * @param {Date} date - Date to validate
- * @param {Object} calendar - Academic calendar with restrictions
- * @returns {Object} - Validation result
+ * Check if a date is within the academic semester
+ * @param {Date|string} date - Date to check
+ * @param {Object} calendar - Academic calendar object
+ * @returns {boolean} - Whether the date is within the semester
  */
-export const validateAcademicDate = (date, calendar) => {
-  if (!date || !calendar) {
-    return { isValid: false, reason: 'Tarih veya takvim bilgisi eksik' }
+export const isWithinSemester = (date, calendar) => {
+  if (!calendar || !calendar.semesterStart || !calendar.semesterEnd) {
+    return false
   }
   
-  const checkDate = new Date(date)
-  const semesterStart = new Date(calendar.semesterStart)
-  const semesterEnd = new Date(calendar.semesterEnd)
+  const checkDate = date instanceof Date ? date : parseISO(date)
+  const semesterStart = parseISO(calendar.semesterStart)
+  const semesterEnd = parseISO(calendar.semesterEnd)
+  
+  if (!isValid(checkDate) || !isValid(semesterStart) || !isValid(semesterEnd)) {
+    return false
+  }
+  
+  return isWithinInterval(checkDate, { start: semesterStart, end: semesterEnd })
+}
+
+/**
+ * Check if a date is a holiday
+ * @param {Date|string} date - Date to check
+ * @param {Object} calendar - Academic calendar object
+ * @returns {Object|null} - Holiday object if date is a holiday, null otherwise
+ */
+export const getHolidayForDate = (date, calendar) => {
+  if (!calendar || !calendar.holidays || !Array.isArray(calendar.holidays)) {
+    return null
+  }
+  
+  const checkDate = date instanceof Date ? date : parseISO(date)
+  
+  if (!isValid(checkDate)) {
+    return null
+  }
+  
+  return calendar.holidays.find(holiday => {
+    const holidayStart = parseISO(holiday.startDate)
+    const holidayEnd = parseISO(holiday.endDate)
+    
+    if (!isValid(holidayStart) || !isValid(holidayEnd)) {
+      return false
+    }
+    
+    return isWithinInterval(checkDate, { start: holidayStart, end: holidayEnd })
+  }) || null
+}
+
+/**
+ * Check if a date is an exam period
+ * @param {Date|string} date - Date to check
+ * @param {Object} calendar - Academic calendar object
+ * @returns {boolean} - Whether the date is in an exam period
+ */
+export const isExamPeriod = (date, calendar) => {
+  if (!calendar || !calendar.examPeriods || !Array.isArray(calendar.examPeriods)) {
+    return false
+  }
+  
+  const checkDate = date instanceof Date ? date : parseISO(date)
+  
+  if (!isValid(checkDate)) {
+    return false
+  }
+  
+  return calendar.examPeriods.some(period => {
+    const periodStart = parseISO(period.startDate)
+    const periodEnd = parseISO(period.endDate)
+    
+    if (!isValid(periodStart) || !isValid(periodEnd)) {
+      return false
+    }
+    
+    return isWithinInterval(checkDate, { start: periodStart, end: periodEnd })
+  })
+}
+
+/**
+ * Get week number within the semester
+ * @param {Date|string} date - Date to check
+ * @param {Object} calendar - Academic calendar object
+ * @returns {number} - Week number (1-based) or -1 if invalid
+ */
+export const getSemesterWeek = (date, calendar) => {
+  if (!calendar || !calendar.semesterStart) {
+    return -1
+  }
+  
+  const checkDate = date instanceof Date ? date : parseISO(date)
+  const semesterStart = parseISO(calendar.semesterStart)
+  
+  if (!isValid(checkDate) || !isValid(semesterStart)) {
+    return -1
+  }
+  
+  // If date is before semester start, return -1
+  if (checkDate < semesterStart) {
+    return -1
+  }
+  
+  // Calculate week number (1-based)
+  return Math.floor(differenceInDays(checkDate, semesterStart) / 7) + 1
+}
+
+/**
+ * Format academic date with Turkish locale
+ * @param {Date|string} date - Date to format
+ * @param {string} formatStr - Format string
+ * @returns {string} - Formatted date
+ */
+export const formatAcademicDate = (date, formatStr = 'PPP') => {
+  const parsedDate = date instanceof Date ? date : parseISO(date)
+  
+  if (!isValid(parsedDate)) {
+    return 'Geçersiz Tarih'
+  }
+  
+  return format(parsedDate, formatStr, { locale: tr })
+}
+
+/**
+ * Check if a class can be started on a specific date and time
+ * @param {Date|string} date - Date to check
+ * @param {string} startTime - Start time (HH:MM)
+ * @param {string} endTime - End time (HH:MM)
+ * @param {Object} calendar - Academic calendar object
+ * @param {Object} schedule - Course schedule object
+ * @returns {Object} - Validation result
+ */
+export const validateClassStart = (date, startTime, endTime, calendar, schedule) => {
+  const errors = []
+  
+  // Check if date is valid
+  const checkDate = date instanceof Date ? date : parseISO(date)
+  if (!isValid(checkDate)) {
+    errors.push('Geçersiz tarih')
+    return { isValid: false, errors }
+  }
   
   // Check if date is within semester
-  if (checkDate < semesterStart || checkDate > semesterEnd) {
-    return { 
-      isValid: false, 
-      reason: 'Tarih akademik dönem dışında',
-      type: 'out_of_semester'
-    }
+  if (!isWithinSemester(checkDate, calendar)) {
+    errors.push('Seçilen tarih akademik dönem içinde değil')
   }
   
   // Check if date is a holiday
-  if (calendar.holidays && Array.isArray(calendar.holidays)) {
-    for (const holiday of calendar.holidays) {
-      const holidayStart = new Date(holiday.startDate)
-      const holidayEnd = new Date(holiday.endDate)
-      
-      if (checkDate >= holidayStart && checkDate <= holidayEnd) {
-        return { 
-          isValid: false, 
-          reason: `${holiday.name} tatili`,
-          type: 'holiday',
-          holidayName: holiday.name
-        }
+  const holiday = getHolidayForDate(checkDate, calendar)
+  if (holiday) {
+    errors.push(`Seçilen tarih tatil günü: ${holiday.name}`)
+  }
+  
+  // Check if date is in exam period
+  if (isExamPeriod(checkDate, calendar)) {
+    errors.push('Seçilen tarih sınav döneminde')
+  }
+  
+  // Check if time is valid for the schedule
+  if (schedule) {
+    const dayOfWeek = format(checkDate, 'EEEE', { locale: tr })
+    const scheduleDay = Object.keys(schedule).find(day => 
+      day.toLowerCase() === dayOfWeek.toLowerCase()
+    )
+    
+    if (!scheduleDay) {
+      errors.push(`Bu gün (${dayOfWeek}) için planlanmış ders yok`)
+    } else {
+      const scheduledTime = schedule[scheduleDay]
+      if (scheduledTime.startTime !== startTime || scheduledTime.endTime !== endTime) {
+        errors.push(`Seçilen saat programdaki saat ile uyuşmuyor (${scheduledTime.startTime}-${scheduledTime.endTime})`)
       }
     }
-  }
-  
-  // Check if date is weekend (Saturday or Sunday)
-  const dayOfWeek = checkDate.getDay()
-  if (dayOfWeek === 0 || dayOfWeek === 6) {
-    return { 
-      isValid: false, 
-      reason: 'Hafta sonu',
-      type: 'weekend'
-    }
-  }
-  
-  // Check if date is in the future (for attendance)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  checkDate.setHours(0, 0, 0, 0)
-  
-  if (checkDate > today) {
-    return { 
-      isValid: false, 
-      reason: 'Gelecek tarih için devamsızlık alınamaz',
-      type: 'future_date'
-    }
-  }
-  
-  return { isValid: true, reason: null, type: null }
-}
-
-/**
- * Validate class session timing
- * @param {string} startTime - Start time (HH:MM)
- * @param {string} endTime - End time (HH:MM)
- * @param {Object} options - Validation options
- * @returns {Object} - Validation result
- */
-export const validateSessionTiming = (startTime, endTime, options = {}) => {
-  const {
-    minDuration = 50, // Minimum 50 minutes
-    maxDuration = 180, // Maximum 3 hours
-    allowedStartTimes = [], // Specific allowed start times
-    workingHours = { start: '08:00', end: '18:00' }
-  } = options
-  
-  if (!startTime || !endTime) {
-    return { isValid: false, reason: 'Başlangıç ve bitiş saati gereklidir' }
-  }
-  
-  const start = new Date(`2000-01-01 ${startTime}`)
-  const end = new Date(`2000-01-01 ${endTime}`)
-  
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-    return { isValid: false, reason: 'Geçersiz saat formatı' }
-  }
-  
-  if (end <= start) {
-    return { isValid: false, reason: 'Bitiş saati başlangıç saatinden sonra olmalıdır' }
-  }
-  
-  // Check duration
-  const durationMinutes = (end - start) / (1000 * 60)
-  if (durationMinutes < minDuration) {
-    return { isValid: false, reason: `Ders süresi en az ${minDuration} dakika olmalıdır` }
-  }
-  
-  if (durationMinutes > maxDuration) {
-    return { isValid: false, reason: `Ders süresi en fazla ${maxDuration} dakika olmalıdır` }
-  }
-  
-  // Check working hours
-  if (workingHours.start && workingHours.end) {
-    const workStart = new Date(`2000-01-01 ${workingHours.start}`)
-    const workEnd = new Date(`2000-01-01 ${workingHours.end}`)
-    
-    if (start < workStart || end > workEnd) {
-      return { 
-        isValid: false, 
-        reason: `Ders saatleri ${workingHours.start}-${workingHours.end} arasında olmalıdır` 
-      }
-    }
-  }
-  
-  // Check allowed start times
-  if (allowedStartTimes.length > 0 && !allowedStartTimes.includes(startTime)) {
-    return { 
-      isValid: false, 
-      reason: `İzin verilen başlangıç saatleri: ${allowedStartTimes.join(', ')}` 
-    }
-  }
-  
-  return { isValid: true, reason: null }
-}
-
-/**
- * Validate course prerequisites
- * @param {Object} course - Course to validate
- * @param {Array} completedCourses - List of completed courses
- * @returns {Object} - Validation result
- */
-export const validateCoursePrerequisites = (course, completedCourses = []) => {
-  if (!course.prerequisites || course.prerequisites.length === 0) {
-    return { isValid: true, missingPrerequisites: [] }
-  }
-  
-  const completedCodes = completedCourses.map(c => c.code)
-  const missingPrerequisites = course.prerequisites.filter(
-    prereq => !completedCodes.includes(prereq)
-  )
-  
-  return {
-    isValid: missingPrerequisites.length === 0,
-    missingPrerequisites
-  }
-}
-
-/**
- * Validate student enrollment capacity
- * @param {Object} course - Course information
- * @param {number} currentEnrollment - Current number of enrolled students
- * @returns {Object} - Validation result
- */
-export const validateEnrollmentCapacity = (course, currentEnrollment) => {
-  if (!course.maxCapacity) {
-    return { isValid: true, reason: null }
-  }
-  
-  if (currentEnrollment >= course.maxCapacity) {
-    return { 
-      isValid: false, 
-      reason: `Ders kapasitesi dolu (${course.maxCapacity}/${course.maxCapacity})` 
-    }
-  }
-  
-  const remainingSpots = course.maxCapacity - currentEnrollment
-  let warning = null
-  
-  if (remainingSpots <= 5) {
-    warning = `Sadece ${remainingSpots} yer kaldı`
-  }
-  
-  return { 
-    isValid: true, 
-    reason: null, 
-    warning,
-    remainingSpots 
-  }
-}
-
-/**
- * Validate attendance percentage requirements
- * @param {Array} attendanceRecords - Student's attendance records
- * @param {Object} requirements - Attendance requirements
- * @returns {Object} - Validation result
- */
-export const validateAttendanceRequirement = (attendanceRecords, requirements = {}) => {
-  const { minimumPercentage = 70, warningPercentage = 80 } = requirements
-  
-  if (!Array.isArray(attendanceRecords) || attendanceRecords.length === 0) {
-    return { 
-      isValid: true, 
-      percentage: 100, 
-      status: 'no_records' 
-    }
-  }
-  
-  const totalSessions = attendanceRecords.length
-  const presentSessions = attendanceRecords.filter(record => record.status === 'present').length
-  const percentage = (presentSessions / totalSessions) * 100
-  
-  let status = 'good'
-  let message = `Devam oranı: %${percentage.toFixed(1)}`
-  
-  if (percentage < minimumPercentage) {
-    status = 'critical'
-    message = `Devam oranı kritik seviyede: %${percentage.toFixed(1)} (Minimum: %${minimumPercentage})`
-  } else if (percentage < warningPercentage) {
-    status = 'warning'
-    message = `Devam oranı uyarı seviyesinde: %${percentage.toFixed(1)} (Hedef: %${warningPercentage})`
-  }
-  
-  return {
-    isValid: percentage >= minimumPercentage,
-    percentage: parseFloat(percentage.toFixed(1)),
-    status,
-    message,
-    presentSessions,
-    totalSessions
-  }
-}
-
-/**
- * Validate makeup class eligibility
- * @param {Object} originalSession - Original session that was missed
- * @param {Date} makeupDate - Proposed makeup date
- * @param {Object} calendar - Academic calendar
- * @returns {Object} - Validation result
- */
-export const validateMakeupClassEligibility = (originalSession, makeupDate, calendar) => {
-  if (!originalSession || !makeupDate) {
-    return { isValid: false, reason: 'Eksik bilgi' }
-  }
-  
-  const originalDate = new Date(originalSession.date)
-  const makeup = new Date(makeupDate)
-  
-  // Makeup class should be within the same semester
-  const semesterStart = new Date(calendar.semesterStart)
-  const semesterEnd = new Date(calendar.semesterEnd)
-  
-  if (makeup < semesterStart || makeup > semesterEnd) {
-    return { 
-      isValid: false, 
-      reason: 'Telafi dersi aynı dönem içinde olmalıdır' 
-    }
-  }
-  
-  // Makeup class should be after the original date
-  if (makeup <= originalDate) {
-    return { 
-      isValid: false, 
-      reason: 'Telafi dersi orijinal dersten sonra olmalıdır' 
-    }
-  }
-  
-  // Check if makeup date is valid according to academic calendar
-  const dateValidation = validateAcademicDate(makeup, calendar)
-  if (!dateValidation.isValid) {
-    return { 
-      isValid: false, 
-      reason: `Telafi tarihi uygun değil: ${dateValidation.reason}` 
-    }
-  }
-  
-  // Makeup class should be within reasonable time (e.g., within 4 weeks)
-  const timeDiff = makeup - originalDate
-  const daysDiff = timeDiff / (1000 * 60 * 60 * 24)
-  
-  if (daysDiff > 28) { // 4 weeks
-    return { 
-      isValid: false, 
-      reason: 'Telafi dersi 4 hafta içinde yapılmalıdır' 
-    }
-  }
-  
-  return { isValid: true, reason: null }
-}
-
-/**
- * Validate grade input
- * @param {number|string} grade - Grade to validate
- * @param {Object} gradingSystem - Grading system configuration
- * @returns {Object} - Validation result
- */
-export const validateGrade = (grade, gradingSystem = {}) => {
-  const { 
-    type = 'numeric', // 'numeric' or 'letter'
-    minGrade = 0,
-    maxGrade = 100,
-    letterGrades = ['AA', 'BA', 'BB', 'CB', 'CC', 'DC', 'DD', 'FD', 'FF']
-  } = gradingSystem
-  
-  if (grade === null || grade === undefined || grade === '') {
-    return { isValid: false, reason: 'Not girilmelidir' }
-  }
-  
-  if (type === 'numeric') {
-    const numericGrade = parseFloat(grade)
-    
-    if (isNaN(numericGrade)) {
-      return { isValid: false, reason: 'Geçerli bir sayı giriniz' }
-    }
-    
-    if (numericGrade < minGrade || numericGrade > maxGrade) {
-      return { 
-        isValid: false, 
-        reason: `Not ${minGrade}-${maxGrade} arasında olmalıdır` 
-      }
-    }
-    
-    return { isValid: true, normalizedGrade: numericGrade }
-  }
-  
-  if (type === 'letter') {
-    const letterGrade = grade.toString().toUpperCase()
-    
-    if (!letterGrades.includes(letterGrade)) {
-      return { 
-        isValid: false, 
-        reason: `Geçerli harf notları: ${letterGrades.join(', ')}` 
-      }
-    }
-    
-    return { isValid: true, normalizedGrade: letterGrade }
-  }
-  
-  return { isValid: false, reason: 'Bilinmeyen not sistemi' }
-}
-
-/**
- * Validate semester course load
- * @param {Array} courses - List of courses for the semester
- * @param {Object} limits - Course load limits
- * @returns {Object} - Validation result
- */
-export const validateSemesterCourseLoad = (courses, limits = {}) => {
-  const {
-    minCredits = 12,
-    maxCredits = 30,
-    maxCourses = 8
-  } = limits
-  
-  if (!Array.isArray(courses)) {
-    return { isValid: false, reason: 'Ders listesi geçersiz' }
-  }
-  
-  const totalCredits = courses.reduce((sum, course) => sum + (course.credits || 0), 0)
-  const courseCount = courses.length
-  
-  const warnings = []
-  const errors = []
-  
-  if (totalCredits < minCredits) {
-    errors.push(`Minimum ${minCredits} kredi alınmalıdır (Mevcut: ${totalCredits})`)
-  }
-  
-  if (totalCredits > maxCredits) {
-    errors.push(`Maksimum ${maxCredits} kredi alınabilir (Mevcut: ${totalCredits})`)
-  }
-  
-  if (courseCount > maxCourses) {
-    errors.push(`Maksimum ${maxCourses} ders alınabilir (Mevcut: ${courseCount})`)
-  }
-  
-  if (totalCredits > maxCredits * 0.9) {
-    warnings.push('Yüksek kredi yükü - dikkatli olun')
   }
   
   return {
     isValid: errors.length === 0,
-    errors,
-    warnings,
-    totalCredits,
-    courseCount
+    errors
   }
 }
 
 /**
- * Academic validation constants
+ * Calculate attendance statistics for a course
+ * @param {Array} attendanceRecords - Attendance records
+ * @param {Array} students - Student list
+ * @returns {Object} - Attendance statistics
  */
-export const ACADEMIC_CONSTANTS = {
-  SEMESTER_TYPES: ['Fall', 'Spring', 'Summer'],
-  COURSE_TYPES: ['Mandatory', 'Elective', 'Optional'],
-  ATTENDANCE_STATUSES: ['present', 'absent', 'excused'],
-  SESSION_TYPES: ['regular', 'makeup', 'exam'],
-  GRADE_TYPES: ['numeric', 'letter'],
+export const calculateAttendanceStats = (attendanceRecords, students) => {
+  if (!Array.isArray(attendanceRecords) || !Array.isArray(students) || students.length === 0) {
+    return {
+      totalSessions: 0,
+      averageAttendance: 0,
+      attendanceByStudent: {},
+      attendanceBySession: {}
+    }
+  }
   
-  // Time slots for scheduling
-  TIME_SLOTS: [
-    '08:30-09:20',
-    '09:30-10:20', 
-    '10:30-11:20',
-    '11:30-12:20',
-    '13:30-14:20',
-    '14:30-15:20',
-    '15:30-16:20',
-    '16:30-17:20'
-  ],
+  const totalStudents = students.length
+  const totalSessions = attendanceRecords.length
   
-  // Days of week
-  WEEKDAYS: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+  // Initialize attendance by student
+  const attendanceByStudent = students.reduce((acc, student) => {
+    acc[student.id] = {
+      present: 0,
+      absent: 0,
+      excused: 0,
+      total: totalSessions,
+      rate: 0
+    }
+    return acc
+  }, {})
   
-  // Default limits
-  DEFAULT_LIMITS: {
-    MIN_CREDITS: 12,
-    MAX_CREDITS: 30,
-    MAX_COURSES: 8,
-    MIN_ATTENDANCE: 70,
-    WARNING_ATTENDANCE: 80,
-    MAX_MAKEUP_DAYS: 28
+  // Initialize attendance by session
+  const attendanceBySession = attendanceRecords.reduce((acc, record) => {
+    acc[record.id] = {
+      date: record.sessionDate,
+      present: 0,
+      absent: 0,
+      excused: 0,
+      total: totalStudents,
+      rate: 0
+    }
+    return acc
+  }, {})
+  
+  // Calculate attendance statistics
+  attendanceRecords.forEach(record => {
+    record.attendanceData.forEach(data => {
+      if (data.status === 'present') {
+        attendanceByStudent[data.studentId].present++
+        attendanceBySession[record.id].present++
+      } else if (data.status === 'absent') {
+        attendanceByStudent[data.studentId].absent++
+        attendanceBySession[record.id].absent++
+      } else if (data.status === 'excused') {
+        attendanceByStudent[data.studentId].excused++
+        attendanceBySession[record.id].excused++
+      }
+    })
+  })
+  
+  // Calculate attendance rates
+  Object.keys(attendanceByStudent).forEach(studentId => {
+    const student = attendanceByStudent[studentId]
+    student.rate = totalSessions > 0 ? (student.present + student.excused) / totalSessions : 0
+  })
+  
+  Object.keys(attendanceBySession).forEach(sessionId => {
+    const session = attendanceBySession[sessionId]
+    session.rate = totalStudents > 0 ? session.present / totalStudents : 0
+  })
+  
+  // Calculate average attendance rate
+  const totalPresent = Object.values(attendanceBySession).reduce((sum, session) => sum + session.present, 0)
+  const totalPossible = totalStudents * totalSessions
+  const averageAttendance = totalPossible > 0 ? totalPresent / totalPossible : 0
+  
+  return {
+    totalSessions,
+    averageAttendance,
+    attendanceByStudent,
+    attendanceBySession
   }
 }
 
+/**
+ * Check if a student has met attendance requirements
+ * @param {Object} student - Student with attendance data
+ * @param {number} requiredRate - Required attendance rate (0-1)
+ * @returns {boolean} - Whether student has met requirements
+ */
+export const hasMetAttendanceRequirement = (student, requiredRate = 0.7) => {
+  if (!student || !student.attendance) {
+    return false
+  }
+  
+  const { present, excused, total } = student.attendance
+  if (total === 0) {
+    return true
+  }
+  
+  const attendanceRate = (present + excused) / total
+  return attendanceRate >= requiredRate
+}
+
+/**
+ * Generate weekly schedule from course data
+ * @param {Array} courses - Course data
+ * @returns {Object} - Weekly schedule
+ */
+export const generateWeeklySchedule = (courses) => {
+  if (!Array.isArray(courses)) {
+    return {}
+  }
+  
+  const weeklySchedule = {
+    Monday: [],
+    Tuesday: [],
+    Wednesday: [],
+    Thursday: [],
+    Friday: []
+  }
+  
+  courses.forEach(course => {
+    if (course.schedule) {
+      const { day, startTime, endTime } = course.schedule
+      if (weeklySchedule[day]) {
+        weeklySchedule[day].push({
+          id: course.id,
+          name: course.name,
+          code: course.code,
+          startTime,
+          endTime,
+          classroom: course.classroom || '',
+          color: course.color || '#3b82f6'
+        })
+      }
+    }
+  })
+  
+  // Sort each day's schedule by start time
+  Object.keys(weeklySchedule).forEach(day => {
+    weeklySchedule[day].sort((a, b) => {
+      const timeA = a.startTime.split(':').map(Number)
+      const timeB = b.startTime.split(':').map(Number)
+      return timeA[0] * 60 + timeA[1] - (timeB[0] * 60 + timeB[1])
+    })
+  })
+  
+  return weeklySchedule
+}
+
+/**
+ * Extend weekly schedule to full semester
+ * @param {Object} weeklySchedule - Weekly schedule
+ * @param {Date|string} semesterStart - Semester start date
+ * @param {number} weeks - Number of weeks
+ * @param {Array} holidays - Holiday periods
+ * @returns {Array} - Full semester schedule
+ */
+export const extendToSemesterSchedule = (weeklySchedule, semesterStart, weeks = 15, holidays = []) => {
+  if (!weeklySchedule || !semesterStart) {
+    return []
+  }
+  
+  const startDate = semesterStart instanceof Date ? semesterStart : parseISO(semesterStart)
+  if (!isValid(startDate)) {
+    return []
+  }
+  
+  const semesterSchedule = []
+  
+  // For each week
+  for (let week = 0; week < weeks; week++) {
+    // For each day of the week
+    Object.keys(weeklySchedule).forEach(day => {
+      const dayIndex = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].indexOf(day)
+      if (dayIndex === -1) return
+      
+      // Calculate the date for this day in this week
+      const date = new Date(startDate)
+      date.setDate(date.getDate() + week * 7 + dayIndex)
+      
+      // Check if this date is a holiday
+      const isHoliday = holidays.some(holiday => {
+        const holidayStart = parseISO(holiday.startDate)
+        const holidayEnd = parseISO(holiday.endDate)
+        return isWithinInterval(date, { start: holidayStart, end: holidayEnd })
+      })
+      
+      if (!isHoliday) {
+        // Add each course for this day
+        weeklySchedule[day].forEach(course => {
+          semesterSchedule.push({
+            ...course,
+            date,
+            week: week + 1,
+            day
+          })
+        })
+      }
+    })
+  }
+  
+  return semesterSchedule
+}
+
 export default {
-  validateAcademicDate,
-  validateSessionTiming,
-  validateCoursePrerequisites,
-  validateEnrollmentCapacity,
-  validateAttendanceRequirement,
-  validateMakeupClassEligibility,
-  validateGrade,
-  validateSemesterCourseLoad,
-  ACADEMIC_CONSTANTS
+  isWithinSemester,
+  getHolidayForDate,
+  isExamPeriod,
+  getSemesterWeek,
+  formatAcademicDate,
+  validateClassStart,
+  calculateAttendanceStats,
+  hasMetAttendanceRequirement,
+  generateWeeklySchedule,
+  extendToSemesterSchedule
 }

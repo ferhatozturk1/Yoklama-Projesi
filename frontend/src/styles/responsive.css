@@ -1,0 +1,701 @@
+/**
+ * Responsive Design Utilities
+ * 
+ * This file contains responsive design utilities for the Teacher Attendance Frontend.
+ * It follows a mobile-first approach with breakpoints at:
+ * - Mobile: 320px - 768px
+ * - Tablet: 768px - 1024px
+ * - Desktop: 1024px+
+ */
+
+/* CSS Variables for breakpoints */
+:root {
+  /* Breakpoints */
+  --breakpoint-sm: 320px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  
+  /* Touch target sizes */
+  --touch-target-size: 44px;
+  --touch-target-spacing: 8px;
+  
+  /* Container widths */
+  --container-sm: 100%;
+  --container-md: 720px;
+  --container-lg: 960px;
+  --container-xl: 1140px;
+}
+
+/* ===== Responsive Container ===== */
+.container-responsive {
+  width: 100%;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 768px) {
+  .container-responsive {
+    max-width: var(--container-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    max-width: var(--container-lg);
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-responsive {
+    max-width: var(--container-xl);
+  }
+}
+
+/* ===== Responsive Grid System ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-gap: 1rem;
+}
+
+/* Grid gap variations */
+.grid-gap-0 {
+  grid-gap: 0;
+}
+
+.grid-gap-1 {
+  grid-gap: 0.25rem;
+}
+
+.grid-gap-2 {
+  grid-gap: 0.5rem;
+}
+
+.grid-gap-3 {
+  grid-gap: 0.75rem;
+}
+
+.grid-gap-4 {
+  grid-gap: 1rem;
+}
+
+.grid-gap-6 {
+  grid-gap: 1.5rem;
+}
+
+.grid-gap-8 {
+  grid-gap: 2rem;
+}
+
+/* Column spans for different screen sizes */
+/* Mobile first - default is for small screens */
+.col-1 { grid-column: span 1; }
+.col-2 { grid-column: span 2; }
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-5 { grid-column: span 5; }
+.col-6 { grid-column: span 6; }
+.col-7 { grid-column: span 7; }
+.col-8 { grid-column: span 8; }
+.col-9 { grid-column: span 9; }
+.col-10 { grid-column: span 10; }
+.col-11 { grid-column: span 11; }
+.col-12 { grid-column: span 12; }
+
+/* Tablet (md) */
+@media (min-width: 768px) {
+  .col-md-1 { grid-column: span 1; }
+  .col-md-2 { grid-column: span 2; }
+  .col-md-3 { grid-column: span 3; }
+  .col-md-4 { grid-column: span 4; }
+  .col-md-5 { grid-column: span 5; }
+  .col-md-6 { grid-column: span 6; }
+  .col-md-7 { grid-column: span 7; }
+  .col-md-8 { grid-column: span 8; }
+  .col-md-9 { grid-column: span 9; }
+  .col-md-10 { grid-column: span 10; }
+  .col-md-11 { grid-column: span 11; }
+  .col-md-12 { grid-column: span 12; }
+}
+
+/* Desktop (lg) */
+@media (min-width: 1024px) {
+  .col-lg-1 { grid-column: span 1; }
+  .col-lg-2 { grid-column: span 2; }
+  .col-lg-3 { grid-column: span 3; }
+  .col-lg-4 { grid-column: span 4; }
+  .col-lg-5 { grid-column: span 5; }
+  .col-lg-6 { grid-column: span 6; }
+  .col-lg-7 { grid-column: span 7; }
+  .col-lg-8 { grid-column: span 8; }
+  .col-lg-9 { grid-column: span 9; }
+  .col-lg-10 { grid-column: span 10; }
+  .col-lg-11 { grid-column: span 11; }
+  .col-lg-12 { grid-column: span 12; }
+}
+
+/* Large Desktop (xl) */
+@media (min-width: 1280px) {
+  .col-xl-1 { grid-column: span 1; }
+  .col-xl-2 { grid-column: span 2; }
+  .col-xl-3 { grid-column: span 3; }
+  .col-xl-4 { grid-column: span 4; }
+  .col-xl-5 { grid-column: span 5; }
+  .col-xl-6 { grid-column: span 6; }
+  .col-xl-7 { grid-column: span 7; }
+  .col-xl-8 { grid-column: span 8; }
+  .col-xl-9 { grid-column: span 9; }
+  .col-xl-10 { grid-column: span 10; }
+  .col-xl-11 { grid-column: span 11; }
+  .col-xl-12 { grid-column: span 12; }
+}
+
+/* ===== Flexbox Utilities ===== */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+/* Responsive flex direction */
+@media (min-width: 768px) {
+  .flex-md-row {
+    flex-direction: row;
+  }
+  
+  .flex-md-col {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 1024px) {
+  .flex-lg-row {
+    flex-direction: row;
+  }
+  
+  .flex-lg-col {
+    flex-direction: column;
+  }
+}
+
+/* ===== Responsive Display Utilities ===== */
+.hidden {
+  display: none;
+}
+
+.block {
+  display: block;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.inline {
+  display: inline;
+}
+
+/* Responsive display classes */
+@media (max-width: 767px) {
+  .hidden-sm {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hidden-md {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hidden-lg {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .block-md {
+    display: block;
+  }
+  
+  .flex-md {
+    display: flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .block-lg {
+    display: block;
+  }
+  
+  .flex-lg {
+    display: flex;
+  }
+}
+
+/* ===== Responsive Spacing Utilities ===== */
+/* Margins */
+.m-0 { margin: 0; }
+.m-1 { margin: 0.25rem; }
+.m-2 { margin: 0.5rem; }
+.m-3 { margin: 0.75rem; }
+.m-4 { margin: 1rem; }
+.m-6 { margin: 1.5rem; }
+.m-8 { margin: 2rem; }
+
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mx-0 { margin-left: 0; margin-right: 0; }
+.mx-1 { margin-left: 0.25rem; margin-right: 0.25rem; }
+.mx-2 { margin-left: 0.5rem; margin-right: 0.5rem; }
+.mx-3 { margin-left: 0.75rem; margin-right: 0.75rem; }
+.mx-4 { margin-left: 1rem; margin-right: 1rem; }
+.mx-6 { margin-left: 1.5rem; margin-right: 1.5rem; }
+.mx-8 { margin-left: 2rem; margin-right: 2rem; }
+
+.my-0 { margin-top: 0; margin-bottom: 0; }
+.my-1 { margin-top: 0.25rem; margin-bottom: 0.25rem; }
+.my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+.my-3 { margin-top: 0.75rem; margin-bottom: 0.75rem; }
+.my-4 { margin-top: 1rem; margin-bottom: 1rem; }
+.my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+.my-8 { margin-top: 2rem; margin-bottom: 2rem; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-6 { margin-top: 1.5rem; }
+.mt-8 { margin-top: 2rem; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
+
+.ml-0 { margin-left: 0; }
+.ml-1 { margin-left: 0.25rem; }
+.ml-2 { margin-left: 0.5rem; }
+.ml-3 { margin-left: 0.75rem; }
+.ml-4 { margin-left: 1rem; }
+.ml-6 { margin-left: 1.5rem; }
+.ml-8 { margin-left: 2rem; }
+
+.mr-0 { margin-right: 0; }
+.mr-1 { margin-right: 0.25rem; }
+.mr-2 { margin-right: 0.5rem; }
+.mr-3 { margin-right: 0.75rem; }
+.mr-4 { margin-right: 1rem; }
+.mr-6 { margin-right: 1.5rem; }
+.mr-8 { margin-right: 2rem; }
+
+/* Paddings */
+.p-0 { padding: 0; }
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
+.p-8 { padding: 2rem; }
+
+.px-0 { padding-left: 0; padding-right: 0; }
+.px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.px-8 { padding-left: 2rem; padding-right: 2rem; }
+
+.py-0 { padding-top: 0; padding-bottom: 0; }
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+
+.pt-0 { padding-top: 0; }
+.pt-1 { padding-top: 0.25rem; }
+.pt-2 { padding-top: 0.5rem; }
+.pt-3 { padding-top: 0.75rem; }
+.pt-4 { padding-top: 1rem; }
+.pt-6 { padding-top: 1.5rem; }
+.pt-8 { padding-top: 2rem; }
+
+.pb-0 { padding-bottom: 0; }
+.pb-1 { padding-bottom: 0.25rem; }
+.pb-2 { padding-bottom: 0.5rem; }
+.pb-3 { padding-bottom: 0.75rem; }
+.pb-4 { padding-bottom: 1rem; }
+.pb-6 { padding-bottom: 1.5rem; }
+.pb-8 { padding-bottom: 2rem; }
+
+.pl-0 { padding-left: 0; }
+.pl-1 { padding-left: 0.25rem; }
+.pl-2 { padding-left: 0.5rem; }
+.pl-3 { padding-left: 0.75rem; }
+.pl-4 { padding-left: 1rem; }
+.pl-6 { padding-left: 1.5rem; }
+.pl-8 { padding-left: 2rem; }
+
+.pr-0 { padding-right: 0; }
+.pr-1 { padding-right: 0.25rem; }
+.pr-2 { padding-right: 0.5rem; }
+.pr-3 { padding-right: 0.75rem; }
+.pr-4 { padding-right: 1rem; }
+.pr-6 { padding-right: 1.5rem; }
+.pr-8 { padding-right: 2rem; }
+
+/* Responsive margins and paddings */
+@media (min-width: 768px) {
+  .m-md-0 { margin: 0; }
+  .m-md-1 { margin: 0.25rem; }
+  .m-md-2 { margin: 0.5rem; }
+  .m-md-3 { margin: 0.75rem; }
+  .m-md-4 { margin: 1rem; }
+  .m-md-6 { margin: 1.5rem; }
+  .m-md-8 { margin: 2rem; }
+  
+  .mx-md-auto { margin-left: auto; margin-right: auto; }
+  .mx-md-0 { margin-left: 0; margin-right: 0; }
+  .mx-md-1 { margin-left: 0.25rem; margin-right: 0.25rem; }
+  .mx-md-2 { margin-left: 0.5rem; margin-right: 0.5rem; }
+  .mx-md-3 { margin-left: 0.75rem; margin-right: 0.75rem; }
+  .mx-md-4 { margin-left: 1rem; margin-right: 1rem; }
+  .mx-md-6 { margin-left: 1.5rem; margin-right: 1.5rem; }
+  .mx-md-8 { margin-left: 2rem; margin-right: 2rem; }
+  
+  .my-md-0 { margin-top: 0; margin-bottom: 0; }
+  .my-md-1 { margin-top: 0.25rem; margin-bottom: 0.25rem; }
+  .my-md-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+  .my-md-3 { margin-top: 0.75rem; margin-bottom: 0.75rem; }
+  .my-md-4 { margin-top: 1rem; margin-bottom: 1rem; }
+  .my-md-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+  .my-md-8 { margin-top: 2rem; margin-bottom: 2rem; }
+  
+  .p-md-0 { padding: 0; }
+  .p-md-1 { padding: 0.25rem; }
+  .p-md-2 { padding: 0.5rem; }
+  .p-md-3 { padding: 0.75rem; }
+  .p-md-4 { padding: 1rem; }
+  .p-md-6 { padding: 1.5rem; }
+  .p-md-8 { padding: 2rem; }
+  
+  .px-md-0 { padding-left: 0; padding-right: 0; }
+  .px-md-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+  .px-md-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .px-md-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+  .px-md-4 { padding-left: 1rem; padding-right: 1rem; }
+  .px-md-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .px-md-8 { padding-left: 2rem; padding-right: 2rem; }
+  
+  .py-md-0 { padding-top: 0; padding-bottom: 0; }
+  .py-md-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+  .py-md-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .py-md-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+  .py-md-4 { padding-top: 1rem; padding-bottom: 1rem; }
+  .py-md-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+  .py-md-8 { padding-top: 2rem; padding-bottom: 2rem; }
+}
+
+@media (min-width: 1024px) {
+  .m-lg-0 { margin: 0; }
+  .m-lg-1 { margin: 0.25rem; }
+  .m-lg-2 { margin: 0.5rem; }
+  .m-lg-3 { margin: 0.75rem; }
+  .m-lg-4 { margin: 1rem; }
+  .m-lg-6 { margin: 1.5rem; }
+  .m-lg-8 { margin: 2rem; }
+  
+  .mx-lg-auto { margin-left: auto; margin-right: auto; }
+  .mx-lg-0 { margin-left: 0; margin-right: 0; }
+  .mx-lg-1 { margin-left: 0.25rem; margin-right: 0.25rem; }
+  .mx-lg-2 { margin-left: 0.5rem; margin-right: 0.5rem; }
+  .mx-lg-3 { margin-left: 0.75rem; margin-right: 0.75rem; }
+  .mx-lg-4 { margin-left: 1rem; margin-right: 1rem; }
+  .mx-lg-6 { margin-left: 1.5rem; margin-right: 1.5rem; }
+  .mx-lg-8 { margin-left: 2rem; margin-right: 2rem; }
+  
+  .my-lg-0 { margin-top: 0; margin-bottom: 0; }
+  .my-lg-1 { margin-top: 0.25rem; margin-bottom: 0.25rem; }
+  .my-lg-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+  .my-lg-3 { margin-top: 0.75rem; margin-bottom: 0.75rem; }
+  .my-lg-4 { margin-top: 1rem; margin-bottom: 1rem; }
+  .my-lg-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+  .my-lg-8 { margin-top: 2rem; margin-bottom: 2rem; }
+  
+  .p-lg-0 { padding: 0; }
+  .p-lg-1 { padding: 0.25rem; }
+  .p-lg-2 { padding: 0.5rem; }
+  .p-lg-3 { padding: 0.75rem; }
+  .p-lg-4 { padding: 1rem; }
+  .p-lg-6 { padding: 1.5rem; }
+  .p-lg-8 { padding: 2rem; }
+  
+  .px-lg-0 { padding-left: 0; padding-right: 0; }
+  .px-lg-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+  .px-lg-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .px-lg-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+  .px-lg-4 { padding-left: 1rem; padding-right: 1rem; }
+  .px-lg-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .px-lg-8 { padding-left: 2rem; padding-right: 2rem; }
+  
+  .py-lg-0 { padding-top: 0; padding-bottom: 0; }
+  .py-lg-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+  .py-lg-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .py-lg-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+  .py-lg-4 { padding-top: 1rem; padding-bottom: 1rem; }
+  .py-lg-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+  .py-lg-8 { padding-top: 2rem; padding-bottom: 2rem; }
+}
+
+/* ===== Touch-Friendly Interface Elements ===== */
+/* Ensure touch targets are at least 44px in size */
+.touch-target {
+  min-width: var(--touch-target-size);
+  min-height: var(--touch-target-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Add appropriate spacing between touch targets */
+.touch-target-spacing > * {
+  margin-right: var(--touch-target-spacing);
+}
+
+.touch-target-spacing > *:last-child {
+  margin-right: 0;
+}
+
+/* Make buttons more touch-friendly on mobile */
+@media (max-width: 767px) {
+  button, 
+  .btn,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    min-height: var(--touch-target-size);
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+  
+  /* Increase form element sizes for better touch interaction */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  select,
+  textarea {
+    min-height: var(--touch-target-size);
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Increase checkbox and radio size */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  /* Increase spacing between form elements */
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+}
+
+/* ===== Responsive Table Utilities ===== */
+/* Horizontal scrolling for tables on mobile */
+.table-responsive {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive table styles */
+@media (max-width: 767px) {
+  .table-stack {
+    display: block;
+  }
+  
+  .table-stack thead {
+    display: none;
+  }
+  
+  .table-stack tbody, 
+  .table-stack tr {
+    display: block;
+  }
+  
+  .table-stack td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem;
+  }
+  
+  .table-stack td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    text-align: left;
+    margin-right: 1rem;
+  }
+  
+  .table-stack tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+  }
+}
+
+/* ===== Responsive Typography ===== */
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.875rem; }
+.text-4xl { font-size: 2.25rem; }
+
+@media (min-width: 768px) {
+  .text-md-xs { font-size: 0.75rem; }
+  .text-md-sm { font-size: 0.875rem; }
+  .text-md-base { font-size: 1rem; }
+  .text-md-lg { font-size: 1.125rem; }
+  .text-md-xl { font-size: 1.25rem; }
+  .text-md-2xl { font-size: 1.5rem; }
+  .text-md-3xl { font-size: 1.875rem; }
+  .text-md-4xl { font-size: 2.25rem; }
+}
+
+@media (min-width: 1024px) {
+  .text-lg-xs { font-size: 0.75rem; }
+  .text-lg-sm { font-size: 0.875rem; }
+  .text-lg-base { font-size: 1rem; }
+  .text-lg-lg { font-size: 1.125rem; }
+  .text-lg-xl { font-size: 1.25rem; }
+  .text-lg-2xl { font-size: 1.5rem; }
+  .text-lg-3xl { font-size: 1.875rem; }
+  .text-lg-4xl { font-size: 2.25rem; }
+}
+
+/* ===== Responsive Modal Utilities ===== */
+/* Full-screen modals on mobile */
+@media (max-width: 767px) {
+  .modal-fullscreen-sm {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+  }
+  
+  .modal-fullscreen-sm .modal-content {
+    height: 100%;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modal-fullscreen-sm .modal-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+/* ===== Accessibility Utilities ===== */
+/* Focus styles */
+.focus-visible:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Skip to content link */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary-color);
+  color: white;
+  padding: 8px;
+  z-index: 100;
+  transition: top 0.2s;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}

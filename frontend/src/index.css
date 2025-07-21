@@ -1,3 +1,7 @@
+/* Import responsive styles */
+@import './styles/responsive.css';
+@import './styles/mobile.css';
+
 /* Reset and base styles */
 * {
   margin: 0;

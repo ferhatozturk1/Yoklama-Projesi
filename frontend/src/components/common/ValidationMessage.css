@@ -1,0 +1,152 @@
+.validation-message {
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid;
+}
+
+.validation-message__content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.validation-message__icon {
+  font-size: 1.125rem;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.validation-message__text {
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.validation-message__list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.validation-message__list li {
+  margin-bottom: 0.25rem;
+}
+
+.validation-message__list li:last-child {
+  margin-bottom: 0;
+}
+
+.validation-message__dismiss {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.validation-message__dismiss:hover {
+  opacity: 1;
+}
+
+/* Error variant */
+.validation-message--error {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.validation-message--error .validation-message__icon {
+  color: #ef4444;
+}
+
+.validation-message--error .validation-message__dismiss {
+  color: #991b1b;
+}
+
+.validation-message--error .validation-message__dismiss:hover {
+  color: #7f1d1d;
+}
+
+/* Warning variant */
+.validation-message--warning {
+  background-color: #fffbeb;
+  border-color: #fed7aa;
+  color: #92400e;
+}
+
+.validation-message--warning .validation-message__icon {
+  color: #f59e0b;
+}
+
+.validation-message--warning .validation-message__dismiss {
+  color: #92400e;
+}
+
+.validation-message--warning .validation-message__dismiss:hover {
+  color: #78350f;
+}
+
+/* Success variant */
+.validation-message--success {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.validation-message--success .validation-message__icon {
+  color: #22c55e;
+}
+
+.validation-message--success .validation-message__dismiss {
+  color: #166534;
+}
+
+.validation-message--success .validation-message__dismiss:hover {
+  color: #14532d;
+}
+
+/* Info variant */
+.validation-message--info {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.validation-message--info .validation-message__icon {
+  color: #3b82f6;
+}
+
+.validation-message--info .validation-message__dismiss {
+  color: #1e40af;
+}
+
+.validation-message--info .validation-message__dismiss:hover {
+  color: #1e3a8a;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .validation-message {
+    padding: 0.625rem;
+    font-size: 0.8125rem;
+  }
+  
+  .validation-message__content {
+    gap: 0.375rem;
+  }
+  
+  .validation-message__icon {
+    font-size: 1rem;
+  }
+  
+  .validation-message__text {
+    font-size: 0.8125rem;
+  }
+}

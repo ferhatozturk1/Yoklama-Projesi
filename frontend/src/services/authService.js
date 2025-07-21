@@ -1,78 +1,141 @@
-import api from './api'
+import apiClient from '../utils/apiClient'
 
-export const authService = {
-  // Login user
-  async login(email, password) {
-    try {
-      const response = await api.post('/auth/login', { email, password })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+/**
+ * Authentication service for handling user authentication operations
+ */
+const authService = {
+  /**
+   * Login with email and password
+   * @param {string} email - User email
+   * @param {string} password - User password
+   * @returns {Promise<Object>} - User data and tokens
+   */
+  login: async (email, password) => {
+    const response = await apiClient.post('/auth/login', { email, password })
+    
+    // Store tokens in local storage
+    localStorage.setItem('token', response.data.token)
+    localStorage.setItem('refreshToken', response.data.refreshToken)
+    
+    return response.data
   },
-
-  // Register new user
-  async register(userData) {
-    try {
-      const response = await api.post('/auth/register', userData)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Register a new user
+   * @param {Object} userData - User registration data
+   * @returns {Promise<Object>} - Created user data
+   */
+  register: async (userData) => {
+    const formData = new FormData()
+    
+    // Add user data to form data
+    Object.keys(userData).forEach(key => {
+      if (key === 'profilePhoto' && userData[key] instanceof File) {
+        formData.append(key, userData[key])
+      } else if (key === 'academicCalendar' && userData[key] instanceof File) {
+        formData.append(key, userData[key])
+      } else {
+        formData.append(key, userData[key])
+      }
+    })
+    
+    const response = await apiClient.post('/auth/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    
+    return response.data
   },
-
-  // Verify token
-  async verifyToken(token) {
+  
+  /**
+   * Logout the current user
+   * @returns {Promise<void>}
+   */
+  logout: async () => {
     try {
-      const response = await api.get('/auth/verify', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      return response.data.user
+      // Call logout endpoint to invalidate token on server
+      await apiClient.post('/auth/logout')
     } catch (error) {
-      throw error
-    }
-  },
-
-  // Logout user
-  async logout() {
-    try {
-      await api.post('/auth/logout')
-    } catch (error) {
-      // Don't throw error for logout, just log it
       console.error('Logout error:', error)
+    } finally {
+      // Remove tokens from local storage
+      localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
     }
   },
-
-  // Refresh token
-  async refreshToken() {
-    try {
-      const response = await api.post('/auth/refresh')
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Check if user is authenticated
+   * @returns {boolean} - Whether user is authenticated
+   */
+  isAuthenticated: () => {
+    return !!localStorage.getItem('token')
   },
-
-  // Request password reset
-  async requestPasswordReset(email) {
-    try {
-      const response = await api.post('/auth/password-reset-request', { email })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Get current user data
+   * @returns {Promise<Object>} - User data
+   */
+  getCurrentUser: async () => {
+    const response = await apiClient.get('/auth/me')
+    return response.data
   },
-
-  // Reset password
-  async resetPassword(token, newPassword) {
-    try {
-      const response = await api.post('/auth/password-reset', { 
-        token, 
-        password: newPassword 
-      })
-      return response.data
-    } catch (error) {
-      throw error
+  
+  /**
+   * Refresh authentication token
+   * @returns {Promise<Object>} - New tokens
+   */
+  refreshToken: async () => {
+    const refreshToken = localStorage.getItem('refreshToken')
+    
+    if (!refreshToken) {
+      throw new Error('No refresh token available')
     }
+    
+    const response = await apiClient.post('/auth/refresh-token', { refreshToken })
+    
+    // Update tokens in local storage
+    localStorage.setItem('token', response.data.token)
+    localStorage.setItem('refreshToken', response.data.refreshToken)
+    
+    return response.data
+  },
+  
+  /**
+   * Request password reset
+   * @param {string} email - User email
+   * @returns {Promise<Object>} - Response data
+   */
+  requestPasswordReset: async (email) => {
+    const response = await apiClient.post('/auth/forgot-password', { email })
+    return response.data
+  },
+  
+  /**
+   * Reset password with token
+   * @param {string} token - Reset token
+   * @param {string} password - New password
+   * @returns {Promise<Object>} - Response data
+   */
+  resetPassword: async (token, password) => {
+    const response = await apiClient.post('/auth/reset-password', { token, password })
+    return response.data
+  },
+  
+  /**
+   * Change password
+   * @param {string} currentPassword - Current password
+   * @param {string} newPassword - New password
+   * @returns {Promise<Object>} - Response data
+   */
+  changePassword: async (currentPassword, newPassword) => {
+    const response = await apiClient.post('/auth/change-password', { 
+      currentPassword, 
+      newPassword 
+    })
+    return response.data
   }
 }
+
+export default authService

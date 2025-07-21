@@ -1,150 +1,182 @@
-import api from './api'
+import apiClient from '../utils/apiClient'
 
-export const attendanceService = {
-  // Start attendance session
-  async startSession(courseId, sessionType = 'regular') {
-    try {
-      const response = await api.post(`/attendance/sessions/start`, {
-        courseId,
-        sessionType
-      })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+/**
+ * Attendance service for handling attendance operations
+ */
+const attendanceService = {
+  /**
+   * Start attendance session
+   * @param {string} courseId - Course ID
+   * @param {Object} sessionData - Session data
+   * @returns {Promise<Object>} - Created session
+   */
+  startSession: async (courseId, sessionData) => {
+    const response = await apiClient.post(`/courses/${courseId}/attendance/start`, sessionData)
+    return response.data
   },
-
-  // End attendance session
-  async endSession(sessionId) {
-    try {
-      const response = await api.post(`/attendance/sessions/${sessionId}/end`)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * End attendance session
+   * @param {string} courseId - Course ID
+   * @param {string} sessionId - Session ID
+   * @returns {Promise<Object>} - Session data
+   */
+  endSession: async (courseId, sessionId) => {
+    const response = await apiClient.post(`/courses/${courseId}/attendance/${sessionId}/end`)
+    return response.data
   },
-
-  // Get QR token for session
-  async getQRToken(sessionId) {
-    try {
-      const response = await api.get(`/attendance/sessions/${sessionId}/qr-token`)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Get active session
+   * @param {string} courseId - Course ID
+   * @returns {Promise<Object>} - Active session data
+   */
+  getActiveSession: async (courseId) => {
+    const response = await apiClient.get(`/courses/${courseId}/attendance/active`)
+    return response.data
   },
-
-  // Get attendance list for a course
-  async getAttendanceList(courseId, filters = {}) {
-    try {
-      const params = new URLSearchParams(filters)
-      const response = await api.get(`/attendance/courses/${courseId}?${params}`)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Get session by ID
+   * @param {string} courseId - Course ID
+   * @param {string} sessionId - Session ID
+   * @returns {Promise<Object>} - Session data
+   */
+  getSession: async (courseId, sessionId) => {
+    const response = await apiClient.get(`/courses/${courseId}/attendance/${sessionId}`)
+    return response.data
   },
-
-  // Get attendance for specific session
-  async getSessionAttendance(sessionId) {
-    try {
-      const response = await api.get(`/attendance/sessions/${sessionId}`)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Get all sessions for a course
+   * @param {string} courseId - Course ID
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Array>} - List of sessions
+   */
+  getSessions: async (courseId, params = {}) => {
+    const response = await apiClient.get(`/courses/${courseId}/attendance`, { params })
+    return response.data
   },
-
-  // Mark student attendance manually
-  async markAttendance(sessionId, studentId, status) {
-    try {
-      const response = await api.post(`/attendance/sessions/${sessionId}/mark`, {
-        studentId,
-        status // 'present', 'absent', 'excused'
-      })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Update attendance for a session
+   * @param {string} courseId - Course ID
+   * @param {string} sessionId - Session ID
+   * @param {Array} attendanceData - Attendance data
+   * @returns {Promise<Object>} - Updated session
+   */
+  updateAttendance: async (courseId, sessionId, attendanceData) => {
+    const response = await apiClient.put(
+      `/courses/${courseId}/attendance/${sessionId}`,
+      { attendances: attendanceData }
+    )
+    return response.data
   },
-
-  // Bulk mark attendance
-  async bulkMarkAttendance(sessionId, attendanceData) {
-    try {
-      const response = await api.post(`/attendance/sessions/${sessionId}/bulk-mark`, {
-        attendanceData
-      })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Mark student attendance
+   * @param {string} courseId - Course ID
+   * @param {string} sessionId - Session ID
+   * @param {string} studentId - Student ID
+   * @param {string} status - Attendance status (present, absent, excused)
+   * @returns {Promise<Object>} - Updated attendance record
+   */
+  markAttendance: async (courseId, sessionId, studentId, status) => {
+    const response = await apiClient.put(
+      `/courses/${courseId}/attendance/${sessionId}/students/${studentId}`,
+      { status }
+    )
+    return response.data
   },
-
-  // Export attendance data
-  async exportAttendance(courseId, format = 'pdf', filters = {}) {
-    try {
-      const params = new URLSearchParams({ ...filters, format })
-      const response = await api.get(`/attendance/courses/${courseId}/export?${params}`, {
-        responseType: 'blob',
-      })
-      
-      // Create blob link to download
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement('a')
-      link.href = url
-      
-      const filename = `attendance_${courseId}_${new Date().toISOString().split('T')[0]}.${format}`
-      link.setAttribute('download', filename)
-      
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(url)
-      
-      return { success: true }
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Bulk update attendance
+   * @param {string} courseId - Course ID
+   * @param {string} sessionId - Session ID
+   * @param {string} status - Attendance status (present, absent, excused)
+   * @param {Array} studentIds - List of student IDs
+   * @returns {Promise<Object>} - Updated session
+   */
+  bulkUpdateAttendance: async (courseId, sessionId, status, studentIds) => {
+    const response = await apiClient.put(
+      `/courses/${courseId}/attendance/${sessionId}/bulk`,
+      { status, studentIds }
+    )
+    return response.data
   },
-
-  // Get attendance statistics
-  async getAttendanceStats(courseId, filters = {}) {
-    try {
-      const params = new URLSearchParams(filters)
-      const response = await api.get(`/attendance/courses/${courseId}/stats?${params}`)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Generate QR code for attendance
+   * @param {string} courseId - Course ID
+   * @param {string} sessionId - Session ID
+   * @returns {Promise<Object>} - QR code data
+   */
+  generateQRCode: async (courseId, sessionId) => {
+    const response = await apiClient.get(
+      `/courses/${courseId}/attendance/${sessionId}/qr`,
+      { responseType: 'blob' }
+    )
+    return response.data
   },
-
-  // Get attendance history for a student
-  async getStudentAttendanceHistory(courseId, studentId) {
-    try {
-      const response = await api.get(`/attendance/courses/${courseId}/students/${studentId}/history`)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Get attendance statistics
+   * @param {string} courseId - Course ID
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>} - Attendance statistics
+   */
+  getAttendanceStatistics: async (courseId, params = {}) => {
+    const response = await apiClient.get(
+      `/courses/${courseId}/attendance/statistics`,
+      { params }
+    )
+    return response.data
   },
-
-  // Update attendance record
-  async updateAttendanceRecord(recordId, status) {
-    try {
-      const response = await api.put(`/attendance/records/${recordId}`, { status })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Get student attendance history
+   * @param {string} courseId - Course ID
+   * @param {string} studentId - Student ID
+   * @returns {Promise<Array>} - Attendance history
+   */
+  getStudentAttendance: async (courseId, studentId) => {
+    const response = await apiClient.get(
+      `/courses/${courseId}/students/${studentId}/attendance`
+    )
+    return response.data
   },
-
-  // Delete attendance session
-  async deleteSession(sessionId) {
-    try {
-      const response = await api.delete(`/attendance/sessions/${sessionId}`)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+  
+  /**
+   * Export attendance data
+   * @param {string} courseId - Course ID
+   * @param {string} format - Export format (pdf, excel)
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Blob>} - Exported file blob
+   */
+  exportAttendance: async (courseId, format = 'pdf', params = {}) => {
+    const response = await apiClient.get(
+      `/courses/${courseId}/attendance/export/${format}`,
+      {
+        params,
+        responseType: 'blob'
+      }
+    )
+    return response.data
+  },
+  
+  /**
+   * Check if attendance can be started
+   * @param {string} courseId - Course ID
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>} - Validation result
+   */
+  validateAttendanceStart: async (courseId, params = {}) => {
+    const response = await apiClient.post(
+      `/courses/${courseId}/attendance/validate`,
+      params
+    )
+    return response.data
   }
 }
+
+export default attendanceService

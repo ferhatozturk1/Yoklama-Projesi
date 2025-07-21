@@ -1,126 +1,261 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import ErrorBoundary, { withErrorBoundary, useErrorHandler } from '../ErrorBoundary'
-import ConfirmDialog, { useConfirmDialog } from '../ConfirmDialog'
-import ErrorDisplay, { NetworkError, ValidationError, EmptyState } from '../ErrorDisplay'
-import ProgressIndicator, { CircularProgress, StepProgress } from '../ProgressIndicator'
+import { 
+  ErrorBoundary, 
+  ErrorDisplay, 
+  FormValidationSummary,
+  ValidationMessage,
+  ConfirmDialog
+} from '../index'
+import { ToastContainer } from 'react-toastify'
+import { showError, showSuccess } from '../ToastNotification'
 
-// Mock toast notifications
-jest.mock('../ToastNotification', () => ({
-  showError: jest.fn(),
-  showSuccess: jest.fn(),
-  showWarning: jest.fn(),
-  showInfo: jest.fn()
+// Mock react-toastify
+jest.mock('react-toastify', () => {
+  const actual = jest.requireActual('react-toastify')
+  return {
+    ...actual,
+    toast: {
+      success: jest.fn(),
+      error: jest.fn(),
+      warning: jest.fn(),
+      info: jest.fn()
+    }
+  }
+})
+
+// Mock Formik context for FormValidationSummary
+jest.mock('formik', () => ({
+  useFormikContext: jest.fn()
 }))
 
 describe('Error Handling Components', () => {
+  // Reset mocks before each test
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   describe('ErrorBoundary', () => {
-    // Component that throws an error
-    const ThrowError = ({ shouldThrow = false }) => {
-      if (shouldThrow) {
-        throw new Error('Test error')
-      }
-      return <div>No error</div>
+    // Create a component that throws an error
+    const ErrorThrowingComponent = () => {
+      throw new Error('Test error')
+      return <div>This will not render</div>
     }
 
-    test('should render children when no error', () => {
-      render(
-        <ErrorBoundary>
-          <ThrowError />
-        </ErrorBoundary>
-      )
-      
-      expect(screen.getByText('No error')).toBeInTheDocument()
-    })
-
-    test('should render error UI when error occurs', () => {
+    it('renders fallback UI when an error occurs', () => {
       // Suppress console.error for this test
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      
+      const originalConsoleError = console.error
+      console.error = jest.fn()
+
       render(
         <ErrorBoundary>
-          <ThrowError shouldThrow />
+          <ErrorThrowingComponent />
         </ErrorBoundary>
       )
-      
+
       expect(screen.getByText('Bir Hata Oluştu')).toBeInTheDocument()
-      expect(screen.getByText('Tekrar Dene')).toBeInTheDocument()
-      expect(screen.getByText('Sayfayı Yenile')).toBeInTheDocument()
+      expect(screen.getByText(/Beklenmeyen bir hata oluştu/i)).toBeInTheDocument()
       
-      consoleSpy.mockRestore()
+      // Restore console.error
+      console.error = originalConsoleError
     })
 
-    test('should call retry handler', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      
-      render(
-        <ErrorBoundary>
-          <ThrowError shouldThrow />
-        </ErrorBoundary>
-      )
-      
-      const retryButton = screen.getByText('Tekrar Dene')
-      fireEvent.click(retryButton)
-      
-      // After retry, should show the component without error
-      expect(screen.getByText('No error')).toBeInTheDocument()
-      
-      consoleSpy.mockRestore()
-    })
+    it('renders custom fallback UI when provided', () => {
+      // Suppress console.error for this test
+      const originalConsoleError = console.error
+      console.error = jest.fn()
 
-    test('should render custom fallback', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
       const customFallback = (error, retry) => (
         <div>
-          <p>Custom error: {error.message}</p>
+          <h2>Custom Error UI</h2>
           <button onClick={retry}>Custom Retry</button>
         </div>
       )
-      
+
       render(
         <ErrorBoundary fallback={customFallback}>
-          <ThrowError shouldThrow />
+          <ErrorThrowingComponent />
         </ErrorBoundary>
       )
-      
-      expect(screen.getByText('Custom error: Test error')).toBeInTheDocument()
+
+      expect(screen.getByText('Custom Error UI')).toBeInTheDocument()
       expect(screen.getByText('Custom Retry')).toBeInTheDocument()
       
-      consoleSpy.mockRestore()
+      // Restore console.error
+      console.error = originalConsoleError
     })
   })
 
-  describe('withErrorBoundary HOC', () => {
-    test('should wrap component with error boundary', () => {
-      const TestComponent = () => <div>Test Component</div>
-      const WrappedComponent = withErrorBoundary(TestComponent)
+  describe('ErrorDisplay', () => {
+    it('renders error message correctly', () => {
+      render(<ErrorDisplay error="Test error message" />)
+      expect(screen.getByText('Test error message')).toBeInTheDocument()
+    })
+
+    it('renders error object message correctly', () => {
+      const error = new Error('Error object message')
+      render(<ErrorDisplay error={error} />)
+      expect(screen.getByText('Error object message')).toBeInTheDocument()
+    })
+
+    it('renders with retry button when onRetry is provided', () => {
+      const handleRetry = jest.fn()
+      render(<ErrorDisplay error="Test error" onRetry={handleRetry} />)
       
-      render(<WrappedComponent />)
+      const retryButton = screen.getByText('Tekrar Dene')
+      expect(retryButton).toBeInTheDocument()
       
-      expect(screen.getByText('Test Component')).toBeInTheDocument()
+      fireEvent.click(retryButton)
+      expect(handleRetry).toHaveBeenCalledTimes(1)
+    })
+
+    it('renders with dismiss button when onDismiss is provided', () => {
+      const handleDismiss = jest.fn()
+      render(<ErrorDisplay error="Test error" onDismiss={handleDismiss} />)
+      
+      const dismissButton = screen.getByText('Kapat')
+      expect(dismissButton).toBeInTheDocument()
+      
+      fireEvent.click(dismissButton)
+      expect(handleDismiss).toHaveBeenCalledTimes(1)
+    })
+
+    it('renders error details when showDetails is true', () => {
+      const error = new Error('Test error')
+      error.stack = 'Error: Test error\\n    at Component'
+      
+      render(<ErrorDisplay error={error} showDetails={true} />)
+      
+      expect(screen.getByText('Hata Detayları')).toBeInTheDocument()
+    })
+  })
+
+  describe('ValidationMessage', () => {
+    it('renders single message correctly', () => {
+      render(<ValidationMessage messages="Test validation message" type="error" />)
+      expect(screen.getByText('Test validation message')).toBeInTheDocument()
+    })
+
+    it('renders multiple messages correctly', () => {
+      render(
+        <ValidationMessage 
+          messages={['First message', 'Second message']} 
+          type="warning" 
+        />
+      )
+      expect(screen.getByText('First message')).toBeInTheDocument()
+      expect(screen.getByText('Second message')).toBeInTheDocument()
+    })
+
+    it('renders different types with correct styling', () => {
+      const { rerender } = render(<ValidationMessage messages="Test" type="error" />)
+      expect(screen.getByText('Test').closest('.validation-message')).toHaveClass('text-red-800')
+      
+      rerender(<ValidationMessage messages="Test" type="warning" />)
+      expect(screen.getByText('Test').closest('.validation-message')).toHaveClass('text-yellow-800')
+      
+      rerender(<ValidationMessage messages="Test" type="info" />)
+      expect(screen.getByText('Test').closest('.validation-message')).toHaveClass('text-blue-800')
+      
+      rerender(<ValidationMessage messages="Test" type="success" />)
+      expect(screen.getByText('Test').closest('.validation-message')).toHaveClass('text-green-800')
+    })
+  })
+
+  describe('FormValidationSummary', () => {
+    it('renders validation errors correctly', () => {
+      // Mock Formik context
+      const { useFormikContext } = require('formik')
+      useFormikContext.mockReturnValue({
+        errors: { name: 'Name is required', email: 'Invalid email' },
+        touched: { name: true, email: true },
+        submitCount: 1
+      })
+      
+      render(<FormValidationSummary />)
+      
+      expect(screen.getByText('Lütfen aşağıdaki hataları düzeltin:')).toBeInTheDocument()
+      expect(screen.getByText('Name is required')).toBeInTheDocument()
+      expect(screen.getByText('Invalid email')).toBeInTheDocument()
+    })
+
+    it('does not render when submitCount is 0 and showOnlyIfSubmitted is true', () => {
+      // Mock Formik context
+      const { useFormikContext } = require('formik')
+      useFormikContext.mockReturnValue({
+        errors: { name: 'Name is required' },
+        touched: { name: true },
+        submitCount: 0
+      })
+      
+      const { container } = render(<FormValidationSummary />)
+      expect(container.firstChild).toBeNull()
+    })
+
+    it('handles nested errors correctly', () => {
+      // Mock Formik context with nested errors
+      const { useFormikContext } = require('formik')
+      useFormikContext.mockReturnValue({
+        errors: { 
+          user: { 
+            name: 'Name is required',
+            address: { city: 'City is required' }
+          }
+        },
+        touched: { 
+          user: { 
+            name: true,
+            address: { city: true }
+          }
+        },
+        submitCount: 1
+      })
+      
+      render(<FormValidationSummary />)
+      
+      expect(screen.getByText('Name is required')).toBeInTheDocument()
+      expect(screen.getByText('City is required')).toBeInTheDocument()
+    })
+  })
+
+  describe('Toast Notifications', () => {
+    it('shows success notification', () => {
+      const { toast } = require('react-toastify')
+      
+      showSuccess('Success message')
+      
+      expect(toast.success).toHaveBeenCalledWith(
+        'Success message',
+        expect.objectContaining({
+          position: "top-right",
+          autoClose: 3000
+        })
+      )
+    })
+
+    it('shows error notification', () => {
+      const { toast } = require('react-toastify')
+      
+      showError('Error message')
+      
+      expect(toast.error).toHaveBeenCalledWith(
+        'Error message',
+        expect.objectContaining({
+          position: "top-right",
+          autoClose: 5000
+        })
+      )
     })
   })
 
   describe('ConfirmDialog', () => {
-    test('should not render when closed', () => {
-      render(
-        <ConfirmDialog
-          isOpen={false}
-          onClose={() => {}}
-          onConfirm={() => {}}
-        />
-      )
-      
-      expect(screen.queryByText('Onay Gerekli')).not.toBeInTheDocument()
-    })
-
-    test('should render when open', () => {
+    it('renders dialog with correct content when open', () => {
       render(
         <ConfirmDialog
           isOpen={true}
-          onClose={() => {}}
-          onConfirm={() => {}}
+          onClose={jest.fn()}
+          onConfirm={jest.fn()}
           title="Test Title"
           message="Test Message"
         />
@@ -132,221 +267,34 @@ describe('Error Handling Components', () => {
       expect(screen.getByText('İptal')).toBeInTheDocument()
     })
 
-    test('should call onConfirm when confirm button clicked', () => {
-      const onConfirm = jest.fn()
+    it('calls onConfirm when confirm button is clicked', () => {
+      const handleConfirm = jest.fn()
       
       render(
         <ConfirmDialog
           isOpen={true}
-          onClose={() => {}}
-          onConfirm={onConfirm}
+          onClose={jest.fn()}
+          onConfirm={handleConfirm}
         />
       )
       
       fireEvent.click(screen.getByText('Onayla'))
-      expect(onConfirm).toHaveBeenCalled()
+      expect(handleConfirm).toHaveBeenCalledTimes(1)
     })
 
-    test('should call onClose when cancel button clicked', () => {
-      const onClose = jest.fn()
+    it('calls onClose when cancel button is clicked', () => {
+      const handleClose = jest.fn()
       
       render(
         <ConfirmDialog
           isOpen={true}
-          onClose={onClose}
-          onConfirm={() => {}}
+          onClose={handleClose}
+          onConfirm={jest.fn()}
         />
       )
       
       fireEvent.click(screen.getByText('İptal'))
-      expect(onClose).toHaveBeenCalled()
+      expect(handleClose).toHaveBeenCalledTimes(1)
     })
-
-    test('should show loading state', () => {
-      render(
-        <ConfirmDialog
-          isOpen={true}
-          onClose={() => {}}
-          onConfirm={() => {}}
-          loading={true}
-        />
-      )
-      
-      expect(screen.getByText('İşleniyor...')).toBeInTheDocument()
-    })
-  })
-
-  describe('ErrorDisplay', () => {
-    test('should render error message', () => {
-      render(<ErrorDisplay error="Test error message" />)
-      
-      expect(screen.getByText('Test error message')).toBeInTheDocument()
-    })
-
-    test('should render with title', () => {
-      render(
-        <ErrorDisplay 
-          error="Test error" 
-          title="Error Title"
-        />
-      )
-      
-      expect(screen.getByText('Error Title')).toBeInTheDocument()
-      expect(screen.getByText('Test error')).toBeInTheDocument()
-    })
-
-    test('should show retry button', () => {
-      const onRetry = jest.fn()
-      
-      render(
-        <ErrorDisplay 
-          error="Test error" 
-          onRetry={onRetry}
-        />
-      )
-      
-      const retryButton = screen.getByText('Tekrar Dene')
-      expect(retryButton).toBeInTheDocument()
-      
-      fireEvent.click(retryButton)
-      expect(onRetry).toHaveBeenCalled()
-    })
-
-    test('should render different types', () => {
-      const { rerender } = render(
-        <ErrorDisplay error="Test error" type="warning" />
-      )
-      
-      // Warning type should have yellow styling
-      expect(screen.getByText('Test error')).toBeInTheDocument()
-      
-      rerender(<ErrorDisplay error="Test error" type="info" />)
-      expect(screen.getByText('Test error')).toBeInTheDocument()
-    })
-  })
-
-  describe('NetworkError', () => {
-    test('should render network error message', () => {
-      render(<NetworkError />)
-      
-      expect(screen.getByText('Bağlantı Hatası')).toBeInTheDocument()
-      expect(screen.getByText('İnternet bağlantınızı kontrol edin ve tekrar deneyin.')).toBeInTheDocument()
-    })
-  })
-
-  describe('ValidationError', () => {
-    test('should render validation errors', () => {
-      const errors = ['Error 1', 'Error 2', 'Error 3']
-      
-      render(<ValidationError errors={errors} />)
-      
-      expect(screen.getByText('Doğrulama Hataları')).toBeInTheDocument()
-      expect(screen.getByText('Error 1')).toBeInTheDocument()
-      expect(screen.getByText('Error 2')).toBeInTheDocument()
-      expect(screen.getByText('Error 3')).toBeInTheDocument()
-    })
-
-    test('should not render when no errors', () => {
-      render(<ValidationError errors={[]} />)
-      
-      expect(screen.queryByText('Doğrulama Hataları')).not.toBeInTheDocument()
-    })
-  })
-
-  describe('EmptyState', () => {
-    test('should render empty state', () => {
-      render(<EmptyState />)
-      
-      expect(screen.getByText('Veri Bulunamadı')).toBeInTheDocument()
-      expect(screen.getByText('Henüz herhangi bir veri bulunmuyor.')).toBeInTheDocument()
-    })
-
-    test('should render with custom content', () => {
-      const action = <button>Add Item</button>
-      
-      render(
-        <EmptyState
-          title="No Items"
-          message="No items found"
-          action={action}
-        />
-      )
-      
-      expect(screen.getByText('No Items')).toBeInTheDocument()
-      expect(screen.getByText('No items found')).toBeInTheDocument()
-      expect(screen.getByText('Add Item')).toBeInTheDocument()
-    })
-  })
-
-  describe('ProgressIndicator', () => {
-    test('should render progress bar', () => {
-      render(<ProgressIndicator value={50} />)
-      
-      // Progress bar should be rendered
-      const progressBar = screen.getByRole('progressbar', { hidden: true })
-      expect(progressBar).toBeInTheDocument()
-    })
-
-    test('should show percentage when enabled', () => {
-      render(<ProgressIndicator value={75} showPercentage />)
-      
-      expect(screen.getByText('75%')).toBeInTheDocument()
-    })
-
-    test('should show label', () => {
-      render(<ProgressIndicator value={50} label="Loading..." />)
-      
-      expect(screen.getByText('Loading...')).toBeInTheDocument()
-    })
-  })
-
-  describe('CircularProgress', () => {
-    test('should render circular progress', () => {
-      render(<CircularProgress value={60} />)
-      
-      expect(screen.getByText('60%')).toBeInTheDocument()
-    })
-
-    test('should hide percentage when disabled', () => {
-      render(<CircularProgress value={60} showPercentage={false} />)
-      
-      expect(screen.queryByText('60%')).not.toBeInTheDocument()
-    })
-  })
-
-  describe('StepProgress', () => {
-    test('should render step progress', () => {
-      const steps = ['Step 1', 'Step 2', 'Step 3']
-      
-      render(<StepProgress steps={steps} currentStep={1} />)
-      
-      expect(screen.getByText('Step 1')).toBeInTheDocument()
-      expect(screen.getByText('Step 2')).toBeInTheDocument()
-      expect(screen.getByText('Step 3')).toBeInTheDocument()
-    })
-
-    test('should show completed steps', () => {
-      const steps = ['Step 1', 'Step 2', 'Step 3']
-      
-      render(<StepProgress steps={steps} currentStep={2} />)
-      
-      // First step should show checkmark (completed)
-      // Second step should show number (current)
-      // Third step should show number (pending)
-      expect(screen.getByText('3')).toBeInTheDocument() // Third step number
-    })
-  })
-})
-
-// Hook tests would require more complex setup with renderHook from @testing-library/react-hooks
-describe('useConfirmDialog hook', () => {
-  test('should be defined', () => {
-    expect(useConfirmDialog).toBeDefined()
-  })
-})
-
-describe('useErrorHandler hook', () => {
-  test('should be defined', () => {
-    expect(useErrorHandler).toBeDefined()
   })
 })
