@@ -1,4 +1,22 @@
-import { toast } from 'react-toastify'
+import React from 'react'
+import { toast, ToastContainer } from 'react-toastify'
+
+// Toast Container component
+export const ToastNotification = () => {
+  return (
+    <ToastContainer
+      position="top-right"
+      autoClose={5000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+    />
+  )
+}
 
 // Success notification
 export const showSuccess = (message) => {
@@ -59,4 +77,13 @@ export const showCustomToast = (message, options = {}) => {
     draggable: true,
     ...options
   })
+}
+
+export default {
+  ToastNotification,
+  showSuccess,
+  showError,
+  showWarning,
+  showInfo,
+  showCustomToast
 }

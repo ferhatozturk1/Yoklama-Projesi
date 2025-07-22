@@ -11,7 +11,7 @@ export { default as ProgressIndicator, CircularProgress, StepProgress, UploadPro
 export { default as ConfirmDialog, useConfirmDialog } from './ConfirmDialog'
 
 // Notification utilities
-export { showSuccess, showError, showWarning, showInfo, showCustomToast } from './ToastNotification'
+export { showSuccess, showError, showWarning, showInfo, showCustomToast, ToastNotification } from './ToastNotification'
 
 // Form components
 export { default as FormField, TextAreaField, SelectField, CheckboxField, RadioGroupField, DatePickerField, TimePickerField } from './FormField'

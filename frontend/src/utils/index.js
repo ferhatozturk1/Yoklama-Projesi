@@ -27,7 +27,15 @@ export { default as cacheManager } from "./cacheManager";
 export * from "./routePrefetcher";
 export { default as imageOptimizer } from "./imageOptimizer";
 export { default as memoHelpers } from "./memoHelpers";
-export { default as contextOptimizer } from "./contextOptimizer";
+export { 
+  lazyLoad, 
+  preloadComponent, 
+  lazyMemo, 
+  preloadComponents, 
+  createPreloadHandlers, 
+  lazyLoadOnVisible 
+} from "./lazyLoad.jsx";
+export { default as contextOptimizer } from "./contextOptimizer.jsx";
 
 // Accessibility utilities
 export { default as accessibilityUtils } from "./accessibilityUtils";

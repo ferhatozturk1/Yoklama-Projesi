@@ -6,7 +6,10 @@ import { compression } from 'vite-plugin-compression2'
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      // Include JSX in .js files
+      include: "**/*.{jsx,js}",
+    }),
     splitVendorChunkPlugin(),
     compression({
       algorithm: 'gzip',

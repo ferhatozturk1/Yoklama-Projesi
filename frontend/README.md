@@ -1,108 +1,93 @@
 # Teacher Attendance Frontend
 
-Bu proje, akademik personel için yoklama yönetim sistemi frontend uygulamasıdır.
-
-## Özellikler
-
-- 🔐 Kullanıcı kimlik doğrulama ve kayıt
-- 👤 Profil yönetimi
-- 📅 Haftalık ders programı oluşturma
-- 📚 Ders yönetimi
-- ✅ Yoklama alma ve takip
-- 📊 Raporlama ve dışa aktarma
-- 📱 Responsive tasarım
-
-## Teknolojiler
-
-- React 18+
-- React Router v6
-- Axios
-- Formik & Yup
-- jsPDF
-- React Toastify
-- Date-fns
-- Vite
+Bu proje, öğretmenlerin yoklama yönetimi için modern bir React frontend uygulamasıdır.
 
 ## Kurulum
 
+### Gereksinimler
+
+- Node.js (v14 veya üzeri)
+- npm veya yarn
+
+### Adımlar
+
 1. Bağımlılıkları yükleyin:
+
 ```bash
 npm install
+# veya
+yarn install
 ```
 
-2. Geliştirme sunucusunu başlatın:
+2. Ortam değişkenlerini ayarlayın:
+
+`.env` dosyasını oluşturun veya `.env.example` dosyasını kopyalayın:
+
+```
+VITE_API_BASE_URL=http://localhost:8000/api
+VITE_NODE_ENV=development
+```
+
+3. Geliştirme sunucusunu başlatın:
+
 ```bash
 npm run dev
+# veya
+yarn dev
 ```
 
-3. Tarayıcınızda `http://localhost:3000` adresini açın.
+Uygulama varsayılan olarak [http://localhost:3000](http://localhost:3000) adresinde çalışacaktır.
 
-## Demo Kullanımı
+## Komutlar
 
-Backend henüz hazır olmadığı için uygulama demo modunda çalışmaktadır:
-
-### Giriş Yapma
-- Herhangi bir geçerli e-posta adresi (örn: `demo@example.com`)
-- En az 3 karakter uzunluğunda bir şifre (örn: `123456`)
-- Bu bilgilerle giriş yapabilir ve dashboard'u görüntüleyebilirsiniz
-
-### Test Kullanıcısı
-- E-posta: `demo@example.com`
-- Şifre: `123456`
-- Bu bilgilerle giriş yaptığınızda demo kullanıcı profili yüklenecektir
+- `npm run dev`: Geliştirme sunucusunu başlatır
+- `npm run build`: Üretim için derleme yapar
+- `npm run build:analyze`: Bundle analizi ile derleme yapar
+- `npm run build:prod`: Üretim ortamı için optimize edilmiş derleme yapar
+- `npm run preview`: Derlenmiş uygulamayı önizleme için çalıştırır
+- `npm run test`: Testleri çalıştırır
+- `npm run test:coverage`: Test kapsamı raporu ile testleri çalıştırır
+- `npm run lint`: Kod kalitesi kontrolü yapar
+- `npm run lint:fix`: Kod kalitesi sorunlarını otomatik düzeltir
 
 ## Proje Yapısı
 
 ```
-src/
-├── assets/          # Görseller, ikonlar
-├── components/      # React bileşenleri
-│   ├── common/      # Ortak bileşenler
-│   ├── layout/      # Sayfa düzeni bileşenleri
-│   ├── dashboard/   # Ana panel bileşenleri
-│   ├── profile/     # Profil bileşenleri
-│   └── course/      # Ders bileşenleri
-├── context/         # React Context providers
-├── pages/           # Sayfa bileşenleri
-├── services/        # API servisleri
-├── utils/           # Yardımcı fonksiyonlar
-└── routes.jsx       # Yönlendirme yapılandırması
+frontend/
+├── public/             # Statik dosyalar
+├── src/                # Kaynak kodları
+│   ├── assets/         # Resimler, fontlar vb.
+│   ├── components/     # Yeniden kullanılabilir bileşenler
+│   ├── context/        # React context'leri
+│   ├── hooks/          # Özel React hook'ları
+│   ├── pages/          # Sayfa bileşenleri
+│   ├── services/       # API servisleri
+│   ├── styles/         # CSS ve stil dosyaları
+│   ├── utils/          # Yardımcı fonksiyonlar
+│   ├── App.jsx         # Ana uygulama bileşeni
+│   ├── main.jsx        # Uygulama giriş noktası
+│   └── routes.jsx      # Rota yapılandırması
+├── .env                # Ortam değişkenleri
+├── index.html          # HTML şablonu
+├── package.json        # Bağımlılıklar ve komutlar
+└── vite.config.js      # Vite yapılandırması
 ```
 
-## Geliştirme
+## Özellikler
 
-### Yeni Bileşen Ekleme
+- Kimlik doğrulama ve kullanıcı yönetimi
+- Ders ve yoklama yönetimi
+- Akademik takvim entegrasyonu
+- Raporlama ve dışa aktarma
+- Duyarlı tasarım
+- Performans optimizasyonları
+- Kapsamlı hata işleme
 
-1. İlgili klasörde bileşen dosyasını oluşturun
-2. Bileşeni export edin
-3. Gerekirse route'lara ekleyin
+## Geliştirme Notları
 
-### API Entegrasyonu
-
-API servisleri `src/services/` klasöründe tanımlanmıştır. Backend hazır olduğunda bu servisler otomatik olarak çalışacaktır.
-
-### Stil Düzenleme
-
-- Global stiller: `src/index.css`
-- Bileşen stilleri: CSS Modules veya Styled Components
-- Utility classes: `src/App.css`
-
-## Build
-
-Üretim için build almak:
-
-```bash
-npm run build
-```
-
-## Test
-
-Testleri çalıştırmak:
-
-```bash
-npm test
-```
-
-## Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır.
+- Proje Vite ile oluşturulmuştur
+- React 18 kullanılmaktadır
+- Rota tabanlı kod bölme ve lazy loading uygulanmıştır
+- API yanıtları için önbellek stratejileri mevcuttur
+- Erişilebilirlik özellikleri eklenmiştir
+- Tarayıcı uyumluluğu için yardımcı fonksiyonlar bulunmaktadır
